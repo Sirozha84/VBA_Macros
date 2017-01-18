@@ -1,6 +1,7 @@
 Attribute VB_Name = "Module1"
 Const First = 6     'Первая строка таблицы
 Const Days = 36     'Количество дней
+Const NameCols = 7  'Количество колонок в наименовании
 Const Result = 18   'Ячейка с остатком в накладной
 
 Dim n As Integer
@@ -18,17 +19,18 @@ Sub Обновить()
     For i = 1 To n * 2 - 2
         Sum = 0
         For j = 3 To Days + 2
-            Sum = Sum + Cells(i + First + 1, j)
+            Sum = Sum + Cells(i + First + 1, NameCols + j)
         Next
-        Cells(i + First + 1, Days + 3) = Sum
+        Cells(i + First + 1, NameCols + Days + 2) = Sum
         All = All + Sum
+        'Затемняем ночные строчки
         If i / 2 = i \ 2 Then
             For j = 3 To Days + 2
-                Cells(i + First + 1, j).Interior.Color = &HE0E0E0
+                Cells(i + First + 1, j + NameCols - 1).Interior.Color = &HE0E0E0
             Next
         End If
     Next
-    Cells(First + n * 2 + 1, Days + 3) = All
+    Cells(First + n * 2 + 1, NameCols + Days + 2) = All
 End Sub
 
 Sub Calc()
@@ -107,16 +109,25 @@ Sub Calc()
 End Sub
 
 Sub AddList(sh As String, Night As Boolean)
-    'Колонка
-    If Not Night Then Cells(First, d + 2) = Left(sh, Len(sh) - 1)
+    Dim st(NameCols)    'Строка в накладной
+    Dim ost             'Остаток в накладной
+    'Колонка (дата)
+    If Not Night Then Cells(First, 1 + NameCols + d) = Left(sh, Len(sh) - 1)
     For i = 6 To 16 '25
-        'Берём строку, и проверяем, есть ли она уже в таблице
-        st = Sheets(sh).Cells(i, 2)
+        'Берём с накладной для проверки
+        For c = 1 To NameCols
+            st(c) = Sheets(sh).Cells(i, c + 1)
+        Next
         ost = Sheets(sh).Cells(i, Result)
-        If st <> "" Then
+        If st(1) <> "" Then
             en = 0
+            'Проверяем, есть ли строка в отчёте
             For j = 1 To n
-                If Cells(First + j * 2, 2) = st Then en = j
+                complate = True
+                For s = 1 To NameCols
+                    If Cells(First + j * 2, 1 + s) <> st(s) Then complate = False
+                Next
+                If complate Then en = j
             Next
             If en = 0 Then
                 sn = n
@@ -125,8 +136,10 @@ Sub AddList(sh As String, Night As Boolean)
                 sn = en
             End If
             Cells(First + sn * 2, 1) = sn       'Номер
-            Cells(First + sn * 2, 2) = st       'Наименование
-            Cells(First + sn * 2 - Night, 2 + d) = ost  'Остаток
+            For c = 1 To NameCols               'Наименование
+                Cells(First + sn * 2, 1 + c) = st(c)
+            Next
+            Cells(First + sn * 2 - Night, 1 + NameCols + d) = ost  'Остаток
         End If
     Next
     If Night Then d = d + 1
@@ -135,5 +148,14 @@ End Sub
 
 Sub Table()
     Cells.Clear
-    Cells(First, Days + 3) = "Итого"
+    Cells(First, 1) = "№"
+    Cells(First, 2) = "Наименование ПФ"
+    Cells(First, 3) = "Тип горла"
+    Cells(First, 4) = "Ед. изм."
+    Cells(First, 5) = "ТПА"
+    Cells(First, 6) = "Краситель"
+    Cells(First, 7) = "Сырьё"
+    Cells(First, 8) = "Количество в коробе"
+    Cells(First, NameCols + Days + 2) = "Итого"
 End Sub
+

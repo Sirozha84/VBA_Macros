@@ -1,5 +1,5 @@
 Attribute VB_Name = "Module1"
-Const First = 6     'Первая строка таблицы
+Const First = 5     'Первая строка таблицы
 Const Days = 36     'Количество дней
 Const NameCols = 7  'Количество колонок в наименовании
 Const Result = 18   'Ячейка с остатком в накладной
@@ -8,9 +8,14 @@ Dim n As Integer
 Dim d As Integer
 
 Sub Обновить()
+'Здесь находится Ваш код
     n = 1
     d = 1
     'Рисуем таблицу
+    
+    Cells.Clear
+    Cells(First, 1) = "Обработка..."
+    Application.ScreenUpdating = False
     Table
     'Заполняем
     Calc
@@ -30,7 +35,10 @@ Sub Обновить()
             Next
         End If
     Next
-    Cells(First + n * 2 + 1, NameCols + Days + 2) = All
+    'Итог
+    Cells(First + n * 2, NameCols + Days + 2) = All
+    Bottom
+    Application.ScreenUpdating = True
 End Sub
 
 Sub Calc()
@@ -112,7 +120,7 @@ Sub AddList(sh As String, Night As Boolean)
     Dim st(NameCols)    'Строка в накладной
     Dim ost             'Остаток в накладной
     'Колонка (дата)
-    If Not Night Then Cells(First, 1 + NameCols + d) = Left(sh, Len(sh) - 1)
+    If Not Night Then Cells(First + 1, 1 + NameCols + d) = Left(sh, Len(sh) - 1)
     For i = 6 To 16 '25
         'Берём с накладной для проверки
         For c = 1 To NameCols
@@ -124,8 +132,8 @@ Sub AddList(sh As String, Night As Boolean)
             'Проверяем, есть ли строка в отчёте
             For j = 1 To n
                 complate = True
-                For s = 1 To NameCols
-                    If Cells(First + j * 2, 1 + s) <> st(s) Then complate = False
+                For c = 1 To NameCols
+                    If Cells(First + j * 2, 1 + c) <> st(c) Then complate = False
                 Next
                 If complate Then en = j
             Next
@@ -143,19 +151,49 @@ Sub AddList(sh As String, Night As Boolean)
         End If
     Next
     If Night Then d = d + 1
-    'd = d + 1
 End Sub
 
 Sub Table()
-    Cells.Clear
+    'Объединение ячеек (делаем это перед заполнением, что бы не изменялся размер)
+    For c = 1 To NameCols + 1
+        range(Cells(First, c), Cells(First + 1, c)).Merge
+        Cells(First, c).HorizontalAlignment = xlCenter
+        Cells(First, c).VerticalAlignment = xlCenter
+        Cells(First, c).WrapText = True
+    Next
+    'Шапка таблицы
     Cells(First, 1) = "№"
-    Cells(First, 2) = "Наименование ПФ"
-    Cells(First, 3) = "Тип горла"
-    Cells(First, 4) = "Ед. изм."
-    Cells(First, 5) = "ТПА"
-    Cells(First, 6) = "Краситель"
-    Cells(First, 7) = "Сырьё"
-    Cells(First, 8) = "Количество в коробе"
+    Cells(First, 2 + NameCols) = "Дата"
+    For c = 1 To NameCols
+        Cells(First, 1 + c) = Sheets("1д").Cells(4, 1 + c)
+    Next
     Cells(First, NameCols + Days + 2) = "Итого"
+    range(Cells(First, 1), Cells(First + 1, NameCols + Days + 2)).Interior.Color = &HE0E0E0
+    'Дата
+    range(Cells(First, NameCols + 2), Cells(First, NameCols + Days + 1)).Merge
+    Cells(First, NameCols + 2).HorizontalAlignment = xlCenter
+    Cells(First, NameCols + 2).VerticalAlignment = xlCenter
 End Sub
 
+Sub Bottom()
+    'Подвал
+    'Рамка
+    last = First + (n - 1) * 2 + 2
+    range(Cells(First, 1), Cells(last, NameCols + Days + 2)).Borders.Weight = xlThin
+    'Красота в ячейках наименования
+    For i = First + 2 To First + (n - 1) * 2 Step 2
+        For c = 1 To NameCols + 1
+            range(Cells(i, c), Cells(i + 1, c)).Merge
+            Cells(i, c).HorizontalAlignment = xlCenter
+            Cells(i, c).VerticalAlignment = xlCenter
+        Next
+    Next
+    'Итого
+    range(Cells(First, NameCols + Days + 2), Cells(First + 1, NameCols + Days + 2)).Merge
+    Cells(First, NameCols + Days + 2).HorizontalAlignment = xlCenter
+    Cells(First, NameCols + Days + 2).VerticalAlignment = xlCenter
+    'Итогогого
+    Cells(last, 1) = "Итого:"
+    range(Cells(last, 1), Cells(last, NameCols + Days + 1)).Merge
+    Cells(last, 1).HorizontalAlignment = xlRight
+End Sub

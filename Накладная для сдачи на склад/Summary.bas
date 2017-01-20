@@ -1,25 +1,31 @@
-Attribute VB_Name = "Module1"
-Const First = 5     'ГЏГҐГ°ГўГ Гї Г±ГІГ°Г®ГЄГ  ГІГ ГЎГ«ГЁГ¶Г»
-Const Days = 36     'ГЉГ®Г«ГЁГ·ГҐГ±ГІГўГ® Г¤Г­ГҐГ©
-Const NameCols = 7  'ГЉГ®Г«ГЁГ·ГҐГ±ГІГўГ® ГЄГ®Г«Г®Г­Г®ГЄ Гў Г­Г ГЁГ¬ГҐГ­Г®ГўГ Г­ГЁГЁ
-Const Result = 18   'ГџГ·ГҐГ©ГЄГ  Г± Г®Г±ГІГ ГІГЄГ®Г¬ Гў Г­Г ГЄГ«Г Г¤Г­Г®Г©
+Attribute VB_Name = "Summary"
+'Сводная таблица
+'Автор: Сергей гордеев
+'Дата изменения: 19.01.2017
+
+Const First = 5     'Первая строка таблицы
+Const Days = 36     'Количество дней
+Const NameCols = 7  'Количество колонок в наименовании
+Const Result = 18   'Ячейка с остатком в накладной
 
 Dim n As Integer
 Dim d As Integer
 
-Sub ГЋГЎГ­Г®ГўГЁГІГј()
-'Г‡Г¤ГҐГ±Гј Г­Г ГµГ®Г¤ГЁГІГ±Гї Г‚Г Гё ГЄГ®Г¤
+Sub Refresh()
+    'В случае покупки убрать
+    If Not WorkIt Then Exit Sub
+    
     n = 1
     d = 1
-    'ГђГЁГ±ГіГҐГ¬ ГІГ ГЎГ«ГЁГ¶Гі
+    'Рисуем таблицу
     
     Cells.Clear
-    Cells(First, 1) = "ГЋГЎГ°Г ГЎГ®ГІГЄГ ..."
+    Cells(First, 1) = "Обработка..."
     Application.ScreenUpdating = False
     Table
-    'Г‡Г ГЇГ®Г«Г­ГїГҐГ¬
+    'Заполняем
     Calc
-    'Г‘Г·ГЁГІГ ГҐГ¬ Г±ГіГ¬Г¬Гі Г®Г±ГІГ ГІГЄГ®Гў
+    'Считаем сумму остатков
     All = 0
     For i = 1 To n * 2 - 2
         Sum = 0
@@ -28,108 +34,108 @@ Sub ГЋГЎГ­Г®ГўГЁГІГј()
         Next
         Cells(i + First + 1, NameCols + Days + 2) = Sum
         All = All + Sum
-        'Г‡Г ГІГҐГ¬Г­ГїГҐГ¬ Г­Г®Г·Г­Г»ГҐ Г±ГІГ°Г®Г·ГЄГЁ
+        'Затемняем ночные строчки
         If i / 2 = i \ 2 Then
             For j = 3 To Days + 2
                 Cells(i + First + 1, j + NameCols - 1).Interior.Color = &HE0E0E0
             Next
         End If
     Next
-    'Г€ГІГ®ГЈ
+    'Итог
     Cells(First + n * 2, NameCols + Days + 2) = All
     Bottom
     Application.ScreenUpdating = True
 End Sub
 
 Sub Calc()
-    Call AddList("-27Г¤", False)
-    Call AddList("-27Г­", True)
-    Call AddList("-28Г¤", False)
-    Call AddList("-28Г­", True)
-    Call AddList("-29Г¤", False)
-    Call AddList("-29Г­", True)
-    Call AddList("-30Г¤", False)
-    Call AddList("-30Г­", True)
-    Call AddList("-31Г¤", False)
-    Call AddList("-31Г­", True)
-    Call AddList("1Г¤", False)
-    Call AddList("1Г­", True)
-    Call AddList("2Г¤", False)
-    Call AddList("2Г­", True)
-    Call AddList("3Г¤", False)
-    Call AddList("3Г­", True)
-    Call AddList("4Г¤", False)
-    Call AddList("4Г­", True)
-    Call AddList("5Г¤", False)
-    Call AddList("5Г­", True)
-    Call AddList("6Г¤", False)
-    Call AddList("6Г­", True)
-    Call AddList("7Г¤", False)
-    Call AddList("7Г­", True)
-    Call AddList("8Г¤", False)
-    Call AddList("8Г­", True)
-    Call AddList("9Г¤", False)
-    Call AddList("9Г­", True)
-    Call AddList("10Г¤", False)
-    Call AddList("10Г­", True)
-    Call AddList("11Г¤", False)
-    Call AddList("11Г­", True)
-    Call AddList("12Г¤", False)
-    Call AddList("12Г­", True)
-    Call AddList("13Г¤", False)
-    Call AddList("13Г­", True)
-    Call AddList("14Г¤", False)
-    Call AddList("14Г­", True)
-    Call AddList("15Г¤", False)
-    Call AddList("15Г­", True)
-    Call AddList("16Г¤", False)
-    Call AddList("16Г­", True)
-    Call AddList("17Г¤", False)
-    Call AddList("17Г­", True)
-    Call AddList("18Г¤", False)
-    Call AddList("18Г­", True)
-    Call AddList("19Г¤", False)
-    Call AddList("19Г­", True)
-    Call AddList("20Г¤", False)
-    Call AddList("20Г­", True)
-    Call AddList("21Г¤", False)
-    Call AddList("21Г­", True)
-    Call AddList("22Г¤", False)
-    Call AddList("22Г­", True)
-    Call AddList("23Г¤", False)
-    Call AddList("23Г­", True)
-    Call AddList("24Г¤", False)
-    Call AddList("24Г­", True)
-    Call AddList("25Г¤", False)
-    Call AddList("25Г­", True)
-    Call AddList("26Г¤", False)
-    Call AddList("26Г­", True)
-    Call AddList("27Г¤", False)
-    Call AddList("27Г­", True)
-    Call AddList("28Г¤", False)
-    Call AddList("28Г­", True)
-    Call AddList("29Г¤", False)
-    Call AddList("29Г­", True)
-    Call AddList("30Г¤", False)
-    Call AddList("30Г­", True)
-    Call AddList("31Г¤", False)
-    Call AddList("31Г­", True)
+    Call AddList("-27д", False)
+    Call AddList("-27н", True)
+    Call AddList("-28д", False)
+    Call AddList("-28н", True)
+    Call AddList("-29д", False)
+    Call AddList("-29н", True)
+    Call AddList("-30д", False)
+    Call AddList("-30н", True)
+    Call AddList("-31д", False)
+    Call AddList("-31н", True)
+    Call AddList("1д", False)
+    Call AddList("1н", True)
+    Call AddList("2д", False)
+    Call AddList("2н", True)
+    Call AddList("3д", False)
+    Call AddList("3н", True)
+    Call AddList("4д", False)
+    Call AddList("4н", True)
+    Call AddList("5д", False)
+    Call AddList("5н", True)
+    Call AddList("6д", False)
+    Call AddList("6н", True)
+    Call AddList("7д", False)
+    Call AddList("7н", True)
+    Call AddList("8д", False)
+    Call AddList("8н", True)
+    Call AddList("9д", False)
+    Call AddList("9н", True)
+    Call AddList("10д", False)
+    Call AddList("10н", True)
+    Call AddList("11д", False)
+    Call AddList("11н", True)
+    Call AddList("12д", False)
+    Call AddList("12н", True)
+    Call AddList("13д", False)
+    Call AddList("13н", True)
+    Call AddList("14д", False)
+    Call AddList("14н", True)
+    Call AddList("15д", False)
+    Call AddList("15н", True)
+    Call AddList("16д", False)
+    Call AddList("16н", True)
+    Call AddList("17д", False)
+    Call AddList("17н", True)
+    Call AddList("18д", False)
+    Call AddList("18н", True)
+    Call AddList("19д", False)
+    Call AddList("19н", True)
+    Call AddList("20д", False)
+    Call AddList("20н", True)
+    Call AddList("21д", False)
+    Call AddList("21н", True)
+    Call AddList("22д", False)
+    Call AddList("22н", True)
+    Call AddList("23д", False)
+    Call AddList("23н", True)
+    Call AddList("24д", False)
+    Call AddList("24н", True)
+    Call AddList("25д", False)
+    Call AddList("25н", True)
+    Call AddList("26д", False)
+    Call AddList("26н", True)
+    Call AddList("27д", False)
+    Call AddList("27н", True)
+    Call AddList("28д", False)
+    Call AddList("28н", True)
+    Call AddList("29д", False)
+    Call AddList("29н", True)
+    Call AddList("30д", False)
+    Call AddList("30н", True)
+    Call AddList("31д", False)
+    Call AddList("31н", True)
 End Sub
 
 Sub AddList(sh As String, Night As Boolean)
-    Dim st(NameCols)    'Г‘ГІГ°Г®ГЄГ  Гў Г­Г ГЄГ«Г Г¤Г­Г®Г©
-    Dim ost             'ГЋГ±ГІГ ГІГ®ГЄ Гў Г­Г ГЄГ«Г Г¤Г­Г®Г©
-    'ГЉГ®Г«Г®Г­ГЄГ  (Г¤Г ГІГ )
+    Dim st(NameCols)    'Строка в накладной
+    Dim ost             'Остаток в накладной
+    'Колонка (дата)
     If Not Night Then Cells(First + 1, 1 + NameCols + d) = Left(sh, Len(sh) - 1)
     For i = 6 To 16 '25
-        'ГЃГҐГ°ВёГ¬ Г± Г­Г ГЄГ«Г Г¤Г­Г®Г© Г¤Г«Гї ГЇГ°Г®ГўГҐГ°ГЄГЁ
+        'Берём с накладной для проверки
         For c = 1 To NameCols
             st(c) = Sheets(sh).Cells(i, c + 1)
         Next
         ost = Sheets(sh).Cells(i, Result)
         If st(1) <> "" Then
             en = 0
-            'ГЏГ°Г®ГўГҐГ°ГїГҐГ¬, ГҐГ±ГІГј Г«ГЁ Г±ГІГ°Г®ГЄГ  Гў Г®ГІГ·ВёГІГҐ
+            'Проверяем, есть ли строка в отчёте
             For j = 1 To n
                 complate = True
                 For c = 1 To NameCols
@@ -143,44 +149,44 @@ Sub AddList(sh As String, Night As Boolean)
             Else
                 sn = en
             End If
-            Cells(First + sn * 2, 1) = sn       'ГЌГ®Г¬ГҐГ°
-            For c = 1 To NameCols               'ГЌГ ГЁГ¬ГҐГ­Г®ГўГ Г­ГЁГҐ
+            Cells(First + sn * 2, 1) = sn       'Номер
+            For c = 1 To NameCols               'Наименование
                 Cells(First + sn * 2, 1 + c) = st(c)
             Next
-            Cells(First + sn * 2 - Night, 1 + NameCols + d) = ost  'ГЋГ±ГІГ ГІГ®ГЄ
+            Cells(First + sn * 2 - Night, 1 + NameCols + d) = ost  'Остаток
         End If
     Next
     If Night Then d = d + 1
 End Sub
 
 Sub Table()
-    'ГЋГЎГєГҐГ¤ГЁГ­ГҐГ­ГЁГҐ ГїГ·ГҐГҐГЄ (Г¤ГҐГ«Г ГҐГ¬ ГЅГІГ® ГЇГҐГ°ГҐГ¤ Г§Г ГЇГ®Г«Г­ГҐГ­ГЁГҐГ¬, Г·ГІГ® ГЎГ» Г­ГҐ ГЁГ§Г¬ГҐГ­ГїГ«Г±Гї Г°Г Г§Г¬ГҐГ°)
+    'Объединение ячеек (делаем это перед заполнением, что бы не изменялся размер)
     For c = 1 To NameCols + 1
         range(Cells(First, c), Cells(First + 1, c)).Merge
         Cells(First, c).HorizontalAlignment = xlCenter
         Cells(First, c).VerticalAlignment = xlCenter
         Cells(First, c).WrapText = True
     Next
-    'ГГ ГЇГЄГ  ГІГ ГЎГ«ГЁГ¶Г»
-    Cells(First, 1) = "В№"
-    Cells(First, 2 + NameCols) = "Г„Г ГІГ "
+    'Шапка таблицы
+    Cells(First, 1) = "№"
+    Cells(First, 2 + NameCols) = "Дата"
     For c = 1 To NameCols
-        Cells(First, 1 + c) = Sheets("1Г¤").Cells(4, 1 + c)
+        Cells(First, 1 + c) = Sheets("1д").Cells(4, 1 + c)
     Next
-    Cells(First, NameCols + Days + 2) = "Г€ГІГ®ГЈГ®"
+    Cells(First, NameCols + Days + 2) = "Итого"
     range(Cells(First, 1), Cells(First + 1, NameCols + Days + 2)).Interior.Color = &HE0E0E0
-    'Г„Г ГІГ 
+    'Дата
     range(Cells(First, NameCols + 2), Cells(First, NameCols + Days + 1)).Merge
     Cells(First, NameCols + 2).HorizontalAlignment = xlCenter
     Cells(First, NameCols + 2).VerticalAlignment = xlCenter
 End Sub
 
 Sub Bottom()
-    'ГЏГ®Г¤ГўГ Г«
-    'ГђГ Г¬ГЄГ 
+    'Подвал
+    'Рамка
     last = First + (n - 1) * 2 + 2
     range(Cells(First, 1), Cells(last, NameCols + Days + 2)).Borders.Weight = xlThin
-    'ГЉГ°Г Г±Г®ГІГ  Гў ГїГ·ГҐГ©ГЄГ Гµ Г­Г ГЁГ¬ГҐГ­Г®ГўГ Г­ГЁГї
+    'Красота в ячейках наименования
     For i = First + 2 To First + (n - 1) * 2 Step 2
         For c = 1 To NameCols + 1
             range(Cells(i, c), Cells(i + 1, c)).Merge
@@ -188,12 +194,12 @@ Sub Bottom()
             Cells(i, c).VerticalAlignment = xlCenter
         Next
     Next
-    'Г€ГІГ®ГЈГ®
+    'Итого
     range(Cells(First, NameCols + Days + 2), Cells(First + 1, NameCols + Days + 2)).Merge
     Cells(First, NameCols + Days + 2).HorizontalAlignment = xlCenter
     Cells(First, NameCols + Days + 2).VerticalAlignment = xlCenter
-    'Г€ГІГ®ГЈГ®ГЈГ®ГЈГ®
-    Cells(last, 1) = "Г€ГІГ®ГЈГ®:"
+    'Итогогого
+    Cells(last, 1) = "Итого:"
     range(Cells(last, 1), Cells(last, NameCols + Days + 1)).Merge
     Cells(last, 1).HorizontalAlignment = xlRight
 End Sub

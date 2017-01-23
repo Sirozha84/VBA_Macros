@@ -1,7 +1,7 @@
 Attribute VB_Name = "Summary"
 'Сводная таблица
 'Автор: Сергей гордеев
-'Дата изменения: 19.01.2017
+'Дата изменения: 23.01.2017
 
 Const First = 5     'Первая строка таблицы
 Const Days = 36     'Количество дней
@@ -17,11 +17,10 @@ Sub Refresh()
     
     n = 1
     d = 1
-    'Рисуем таблицу
-    
     Cells.Clear
     Cells(First, 1) = "Обработка..."
     Application.ScreenUpdating = False
+    'Рисуем таблицу
     Table
     'Заполняем
     Calc
@@ -123,7 +122,8 @@ Sub Calc()
 End Sub
 
 Sub AddList(sh As String, Night As Boolean)
-    Dim st(NameCols)    'Строка в накладной
+    Dim st(NameCols) As String
+    'Строка в накладной
     Dim ost             'Остаток в накладной
     'Колонка (дата)
     If Not Night Then Cells(First + 1, 1 + NameCols + d) = Left(sh, Len(sh) - 1)
@@ -151,7 +151,7 @@ Sub AddList(sh As String, Night As Boolean)
             End If
             Cells(First + sn * 2, 1) = sn       'Номер
             For c = 1 To NameCols               'Наименование
-                Cells(First + sn * 2, 1 + c) = st(c)
+                Cells(First + sn * 2, 1 + c) = "'" + st(c)
             Next
             Cells(First + sn * 2 - Night, 1 + NameCols + d) = ost  'Остаток
         End If

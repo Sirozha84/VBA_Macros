@@ -4,7 +4,7 @@ Attribute VB_Name = "Summary"
 'Дата изменения: 31.01.2017
 
 Const First = 5     'Первая строка таблицы
-Const Days = 36     'Количество дней
+Const Days = 31     'Количество дней
 Const NameCols = 7  'Количество колонок в наименовании
 Const Result = 18   'Ячейка с остатком в накладной
 
@@ -13,7 +13,7 @@ Dim d As Integer
 
 Sub Refresh()
     'В случае покупки убрать
-    If Not WorkIt Then Exit Sub
+    'If Not WorkIt Then Exit Sub
     
     n = 1
     d = 1
@@ -47,10 +47,6 @@ Sub Refresh()
 End Sub
 
 Sub Calc()
-    For dy = 27 To 31
-        AddList "-" + Trim(Str(dy)) + "д", False
-        AddList "-" + Trim(Str(dy)) + "н", True
-    Next
     For dy = 1 To 31
         AddList Trim(Str(dy)) + "д", False
         AddList Trim(Str(dy)) + "н", True

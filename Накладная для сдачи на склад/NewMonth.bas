@@ -1,11 +1,11 @@
 Attribute VB_Name = "NewMonth"
 'Новый месяц
 'Автор: Сергей гордеев
-'Дата изменения: 31.01.2017
+'Дата изменения: 03.04.2017
 
 Sub NewMonth()
     'В случае покупки убрать
-    If Not WorkIt Then Exit Sub
+    'If Not WorkIt Then Exit Sub
     
     Dim data As String
     data = InputBox("Введите дату (в формате месяц.год, например январь 2017 будет выглядеть как 1.17)." + Chr(13))
@@ -17,15 +17,9 @@ Sub NewMonth()
     'Делаем разметку дат
     
     On Error GoTo 0
-    If MsgBox("Сделать сдвиг месяца?" + Chr(13) + "Внимание!!! При этом все существующие данные удалятся, " + _
-        "а последние 5 дней сдвинутся влево.", vbYesNo) = 6 Then
+    If MsgBox("Выполнить очистку данных?", vbYesNo) = 6 Then
         Application.ScreenUpdating = False
-        'Делаем сдвиг
-        For d = 27 To 31
-            CopyPage Trim(Str(d)) + "д", "-" + Trim(Str(d)) + "д"
-            CopyPage Trim(Str(d)) + "н", "-" + Trim(Str(d)) + "н"
-        Next
-        'Очищаем новый месяц
+        'Очищаем...
         For d = 1 To 31
             CLearPage Trim(Str(d)) + "д"
             CLearPage Trim(Str(d)) + "н"

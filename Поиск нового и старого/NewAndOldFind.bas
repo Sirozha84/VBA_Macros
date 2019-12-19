@@ -1,4 +1,8 @@
 Attribute VB_Name = "NewAndOldFind"
+Global sn As Integer
+Global max As Integer
+
+
 Sub NewAndOldFind()
 
     Call MakeCopy
@@ -25,6 +29,7 @@ Private Sub MakeCopy()
             Exit For
         End If
     Next
+    max = i
 End Sub
 
 Private Sub AddNew(sheet)
@@ -36,10 +41,6 @@ Private Sub AddNew(sheet)
                     If Right(Sheets("Res").Cells(j, 1), 5) = Right(Sheets(sheet).Cells(i, 1), 5) Then
                         Find = True
                     End If
-                    'If (Sheets("Res").Cells(j, 1) = Sheets(sheet).Cells(i, 1)) Or _
-                    '    Right(Sheets("Res").Cells(j, 1), 5) = Right(Sheets(sheet).Cells(i, 1), 5) Then
-                    '    Find = True
-                    'End If
                 Else
                     Exit For
                 End If
@@ -48,14 +49,18 @@ Private Sub AddNew(sheet)
                 Sheets("Res").Cells(j, 1) = Sheets(sheet).Cells(i, 1)
                 Sheets("Res").Cells(j, 2) = Sheets(sheet).Cells(i, 2)
                 Sheets("Res").Cells(j, 4) = "Новый из " + sheet
+                max = max + 1
+                sn = sn + 1
             End If
         Else
             Exit For
         End If
     Next
+    Sheets("Res").Cells(max, 4) = "Новых:" + Str(sn)
 End Sub
 
 Private Sub FindDead(sheet)
+    s = 0
     For i = 1 To 99999
         t = Sheets("Res").Cells(i, 1)
         If t = "" Then Exit For
@@ -73,9 +78,11 @@ Private Sub FindDead(sheet)
         If Not Find And Sheets("Res").Cells(i, 4) = "" Then
             If Sheets("Res").Cells(i, 5) = "-" Then
                 Sheets("Res").Cells(i, 5) = "Удалён!"
+                s = s + 1
             Else
                 Sheets("Res").Cells(i, 5) = "-"
             End If
         End If
     Next
+    Sheets("Res").Cells(i, 5) = "Удалено:" + Str(s)
 End Sub

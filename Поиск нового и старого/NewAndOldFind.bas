@@ -3,8 +3,8 @@ Sub NewAndOldFind()
 
     Call MakeCopy
     
-    'Call AddNew ("’¬—Ë¬Œ")
-    'Call AddNew ("“ÂÔÎÓ")
+    Call AddNew("’¬—Ë¬Œ")
+    Call AddNew("“ÂÔÎÓ")
     
     Call FindDead("’¬—Ë¬Œ")
     Call FindDead("“ÂÔÎÓ")
@@ -16,7 +16,7 @@ End Sub
 Private Sub MakeCopy()
     Application.ScreenUpdating = False
     Sheets("Res").Cells.Clear
-    For i = 2 To 99999
+    For i = 1 To 99999
         If Sheets("”‘¿").Cells(i, 1) <> "" Then
             For j = 1 To 3
                 Sheets("Res").Cells(i, j) = Sheets("”‘¿").Cells(i, j)
@@ -28,14 +28,18 @@ Private Sub MakeCopy()
 End Sub
 
 Private Sub AddNew(sheet)
-    For i = 2 To 99999
+    For i = 1 To 99999
         If Sheets(sheet).Cells(i, 1) <> "" Then
             Find = False
             For j = 2 To 99999
                 If Sheets("Res").Cells(j, 2) <> "" Then
-                    If Sheets("Res").Cells(j, 1) = Sheets(sheet).Cells(i, 1) Then
+                    If Right(Sheets("Res").Cells(j, 1), 5) = Right(Sheets(sheet).Cells(i, 1), 5) Then
                         Find = True
                     End If
+                    'If (Sheets("Res").Cells(j, 1) = Sheets(sheet).Cells(i, 1)) Or _
+                    '    Right(Sheets("Res").Cells(j, 1), 5) = Right(Sheets(sheet).Cells(i, 1), 5) Then
+                    '    Find = True
+                    'End If
                 Else
                     Exit For
                 End If
@@ -52,14 +56,13 @@ Private Sub AddNew(sheet)
 End Sub
 
 Private Sub FindDead(sheet)
-    
-    For i = 2 To 99999
+    For i = 1 To 99999
         t = Sheets("Res").Cells(i, 1)
         If t = "" Then Exit For
         Find = False
         For j = 1 To 99999
             If Sheets(sheet).Cells(j, 1) <> "" Then
-                If Sheets(sheet).Cells(j, 1) = t Then
+                If Right(Sheets(sheet).Cells(j, 1), 5) = Right(t, 5) Then
                     Find = True
                     Exit For
                 End If
@@ -67,13 +70,12 @@ Private Sub FindDead(sheet)
                 Exit For
             End If
         Next
-        If Not Find Then
-            If Sheets("Res").Cells(i, 4) = "-" Then
-                Sheets("Res").Cells(i, 4) = "”‰‡Î∏Ì!"
+        If Not Find And Sheets("Res").Cells(i, 4) = "" Then
+            If Sheets("Res").Cells(i, 5) = "-" Then
+                Sheets("Res").Cells(i, 5) = "”‰‡Î∏Ì!"
             Else
-                Sheets("Res").Cells(i, 4) = "-"
+                Sheets("Res").Cells(i, 5) = "-"
             End If
         End If
     Next
-
 End Sub

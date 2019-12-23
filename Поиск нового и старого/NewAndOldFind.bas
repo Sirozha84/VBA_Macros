@@ -1,10 +1,10 @@
 Attribute VB_Name = "NewAndOldFind"
-Const fNew = 1          'Колонка в "Новой" таблице
-Const fOld = 2          'Колонка в "старых" таблицах
-Const method = 2        'Метод сравнения
+'Версия 1.3 (23.12.2019) - Выделение кода из строки
+
+Const fNew = 5          'Колонка в "Новой" таблице
+Const fOld = 5          'Колонка в "старых" таблицах
 Const newTab = "УФА"    '"Новая" таблица
-'Const newTab = "УФА тест"    '"Новая" таблица
-Const maxTabs = 4       'Максимум полей
+Const maxTabs = 5       'Максимум полей
 
 Global sn As Integer        'Счётчик новых строк
 Global max As Integer       'Счётчик строк всего
@@ -16,15 +16,16 @@ Sub NewAndOldFind()
     
     'AddNew("ХВСиВО")
     'AddNew("Тепло")
-    AddNew ("Access")
     'AddNew ("Assecc тест")
+    AddNew ("Тепло1")
     
     'FindDead("ХВСиВО")
     'FindDead("Тепло")
     'FindDead ("Assecc тест")
-    FindDead ("Access")
+    FindDead ("Тепло1")
     
     DeadSum
+    TheEnd
     
 End Sub
 
@@ -66,17 +67,13 @@ Private Sub AddNew(sheet)
     
     For i = 1 To maxOld
     
-        If i Mod 50 = 0 Then
-            Application.ScreenUpdating = True
-            Application.StatusBar = "Поиск новых:" + Persent(i, maxOld)
-            Application.ScreenUpdating = False
-        End If
+        Call ProgressBar("Поиск новых", i, maxOld)
     
         Find = False
         
         For j = 1 To max
             If Sheets("Res").Cells(j, 2) <> "" Then
-                If Compare(Sheets("Res").Cells(j, fNew), Sheets(sheet).Cells(i, fOld)) Then
+                If Sheets("Res").Cells(j, fNew) = Sheets(sheet).Cells(i, fOld) Then
                     Find = True
                 End If
             Else
@@ -114,15 +111,11 @@ Private Sub FindDead(sheet)
     
     For i = 1 To max - sn - 1
         
-        If i Mod 50 = 0 Then
-            Application.ScreenUpdating = True
-            Application.StatusBar = "Поиск удалённых:" + Persent(i, max - sn - 1)
-            Application.ScreenUpdating = False
-        End If
+        Call ProgressBar("Поиск удалённых", i, max - sn - 1)
         
         Find = False
         For j = 1 To maxOld
-            If Compare(Sheets("Res").Cells(i, fNew), Sheets(sheet).Cells(j, fOld)) Then
+            If Sheets("Res").Cells(i, fNew) = Sheets(sheet).Cells(j, fOld) Then
                 Find = True
                 Exit For
             End If
@@ -141,49 +134,89 @@ End Sub
 
 'Итог по удалённым
 Private Sub DeadSum()
-        
+    
+    Application.ScreenUpdating = True
     Application.StatusBar = "Завершение..."
+    Application.ScreenUpdating = False
     
     s = 0
     For i = 1 To max
         If Sheets("Res").Cells(i, maxTabs + 2) = oldTabs Then
             Sheets("Res").Cells(i, maxTabs + 2) = "Удалён!"
             s = s + 1
-        Else
-            'Sheets("Res").Cells(i, maxTabs + 2) = ""
         End If
     Next
     Sheets("Res").Cells(max, maxTabs + 2) = "Удалено:" + Str(s)
     
+End Sub
+
+Private Sub ProgressBar(text As String, ByVal cur As Integer, ByVal all As Integer)
+    If cur Mod 50 = 0 Then
+        Application.ScreenUpdating = True
+        Application.StatusBar = text + ":" + _
+            Str(cur) + " из" + Str(all) + " (" + Str(Int(cur / all * 100)) + "% )"
+        Application.ScreenUpdating = False
+    End If
+End Sub
+
+Private Sub TheEnd()
     Application.StatusBar = "Готово!"
 End Sub
 
-'Процедура сравнения
-Private Function Compare(newCell As String, oldCell As String) As Boolean
+'Выделение кода из строки и помещение его в отдельную ячейку
+Sub CodeEject()
     
-    Compare = False
-    
-    'Метод сравнения 0 - тупо равенство
-    If method = 0 Then
-        Compare = (newCell = oldCell)
-    End If
-    
-    'Метод сравнения 1 - сравнение последних 5-и символов
-    If method = 1 Then
-        Compare = (Left(newCell, 5) = Left(oldCell, 5))
-    End If
-    
-    'Метод сравнения 2 - сравнение по коду в строке типа "aaaaa код: х хх" и "xxxx"
-    If method = 2 Then
-        s = Split(newCell, "код: ")
-        If UBound(s) > 0 Then k = Replace(s(1), " ", "")
-        Compare = (k = oldCell)
-    End If
-    
-End Function
+    codeFrom = 1
+    codeTo = 5
 
-Private Function Persent(ByVal cur As Integer, ByVal all As Integer) As String
-    Persent = Str(cur) + " из" + Str(all) + " (" + Str(Int(cur / all * 100)) + "% )"
-End Function
+    Application.ScreenUpdating = True
+    Application.StatusBar = "Подсчёт строк..."
+    Application.ScreenUpdating = False
+    max = 1
+    Do Until Cells(max + 1, 1) = ""
+        max = max + 1
+    Loop
+    
+    For i = 2 To max
+        Call ProgressBar("Обработка", i, max)
+        c = Cells(i, codeFrom)
+        If InStr(1, c, "код: ", vbTextCompare) Then
+            ss = Split(c, "код: ")
+            If UBound(ss) > 0 Then
+                c = Replace(ss(1), " ", "")
+                kv = InStr(1, c, """", vbTextCompare)
+                If kv > 0 Then c = Left(c, kv - 1)
+            End If
+        End If
+        If InStr(1, c, "Код Объекта: ", vbTextCompare) Then
+            ss = Split(c, "Код Объекта: ")
+            If UBound(ss) > 0 Then
+                c = Replace(ss(1), " ", "")
+                kv = InStr(1, c, """", vbTextCompare)
+                If kv > 0 Then c = Left(s, kv - 1)
+            End If
+        End If
+        If InStr(1, c, "(", vbTextCompare) Then
+            ss = Split(c, "(")
+            If UBound(ss) > 0 Then
+                c = Replace(ss(1), " ", "")
+                kv = InStr(1, c, "(", vbTextCompare)
+                If kv > 0 Then c = Left(c, kv - 1)
+                kv = InStr(1, c, ")", vbTextCompare)
+                If kv > 0 Then c = Left(c, kv - 1)
+            End If
+        End If
+        
+        'Перед записью надо проверить всё ли то что нашли цифры
+        d = True
+        For j = 1 To Len(c)
+            code = Asc(Mid(c, j, 1))
+            If code < 48 Or code > 57 Then d = False
+        Next
+        If Not d Then c = ""
+        Cells(i, codeTo) = c
+    Next
+    
+    TheEnd
 
-
+End Sub

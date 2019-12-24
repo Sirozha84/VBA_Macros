@@ -1,5 +1,6 @@
 Attribute VB_Name = "NewAndOldFind"
 'Версия 1.3 (23.12.2019) - Выделение кода из строки
+'Версия 1.4 (24.12.2019) - Оптимизация сообщений
 
 Const fNew = 5          'Колонка в "Новой" таблице
 Const fOld = 5          'Колонка в "старых" таблицах
@@ -25,16 +26,14 @@ Sub NewAndOldFind()
     FindDead ("Тепло1")
     
     DeadSum
-    TheEnd
+    Message "Готово!"
     
 End Sub
 
 'Подготовка итоговой таблицы
 Private Sub MakeCopy()
     
-    Application.ScreenUpdating = True
-    Application.StatusBar = "Подготовка..."
-    Application.ScreenUpdating = False
+    Message "Подготовка..."
     
     sn = 0
     mx = 0
@@ -57,9 +56,7 @@ End Sub
 Private Sub AddNew(sheet)
     
     'Находим максимум в старой таблице
-    Application.ScreenUpdating = True
-    Application.StatusBar = "Подсчёт строк..."
-    Application.ScreenUpdating = False
+    Message "Подсчёт строк..."
     maxOld = 0
     Do Until Sheets(sheet).Cells(maxOld + 1, 1) = ""
         maxOld = maxOld + 1
@@ -100,9 +97,7 @@ Private Sub FindDead(sheet)
     oldTabs = oldTabs + 1
     
     'Находим максимум в старой таблице
-    Application.ScreenUpdating = True
-    Application.StatusBar = "Подсчёт строк..."
-    Application.ScreenUpdating = False
+    Message "Подсчёт строк..."
     maxOld = 0
     Do Until Sheets(sheet).Cells(maxOld + 1, 1) = ""
         maxOld = maxOld + 1
@@ -135,9 +130,7 @@ End Sub
 'Итог по удалённым
 Private Sub DeadSum()
     
-    Application.ScreenUpdating = True
-    Application.StatusBar = "Завершение..."
-    Application.ScreenUpdating = False
+    Message "Завершение..."
     
     s = 0
     For i = 1 To max
@@ -159,8 +152,11 @@ Private Sub ProgressBar(text As String, ByVal cur As Integer, ByVal all As Integ
     End If
 End Sub
 
-Private Sub TheEnd()
-    Application.StatusBar = "Готово!"
+'Вывод сообщение в статусбар
+Private Sub Message(text As String)
+    Application.ScreenUpdating = True
+    Application.StatusBar = text
+    Application.ScreenUpdating = False
 End Sub
 
 'Выделение кода из строки и помещение его в отдельную ячейку
@@ -217,6 +213,6 @@ Sub CodeEject()
         Cells(i, codeTo) = c
     Next
     
-    TheEnd
+    Message "Готово!"
 
 End Sub

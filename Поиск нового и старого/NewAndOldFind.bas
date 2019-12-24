@@ -2,9 +2,9 @@ Attribute VB_Name = "NewAndOldFind"
 'Версия 1.3 (23.12.2019) - Выделение кода из строки
 'Версия 1.4 (24.12.2019) - Оптимизация сообщений
 
-Const fNew = 5          'Колонка в "Новой" таблице
-Const fOld = 5          'Колонка в "старых" таблицах
-Const newTab = "УФА"    '"Новая" таблица
+Const fNew = 2          'Колонка в "Новой" таблице
+Const fOld = 4          'Колонка в "старых" таблицах
+Const newTab = "НомерТепло (УФА)"    '"Новая" таблица
 Const maxTabs = 5       'Максимум полей
 
 Global sn As Integer        'Счётчик новых строк
@@ -15,15 +15,11 @@ Sub NewAndOldFind()
 
     MakeCopy
     
-    'AddNew("ХВСиВО")
-    'AddNew("Тепло")
-    'AddNew ("Assecc тест")
-    AddNew ("Тепло1")
+    AddNew ("Вода")
+    AddNew ("Тепло")
     
-    'FindDead("ХВСиВО")
-    'FindDead("Тепло")
-    'FindDead ("Assecc тест")
-    FindDead ("Тепло1")
+    FindDead ("Вода")
+    FindDead ("Тепло")
     
     DeadSum
     Message "Готово!"
@@ -62,18 +58,15 @@ Private Sub AddNew(sheet)
         maxOld = maxOld + 1
     Loop
     
-    For i = 1 To maxOld
+    For i = 2 To maxOld
     
         Call ProgressBar("Поиск новых", i, maxOld)
     
         Find = False
         
-        For j = 1 To max
-            If Sheets("Res").Cells(j, 2) <> "" Then
-                If Sheets("Res").Cells(j, fNew) = Sheets(sheet).Cells(i, fOld) Then
-                    Find = True
-                End If
-            Else
+        For j = 2 To max
+            If Sheets("Res").Cells(j, fNew) = Sheets(sheet).Cells(i, fOld) Then
+                Find = True
                 Exit For
             End If
         Next
@@ -81,7 +74,7 @@ Private Sub AddNew(sheet)
             For c = 1 To maxTabs
                 Sheets("Res").Cells(max, c) = Sheets(sheet).Cells(i, c)
             Next
-            Sheets("Res").Cells(max, maxTabs + 1) = "Новый из " + sheet
+            Sheets("Res").Cells(max, maxTabs + 1) = "Новый из " + sheet + " (Не найден в УФА)"
             max = max + 1
             sn = sn + 1
         End If
@@ -135,8 +128,10 @@ Private Sub DeadSum()
     s = 0
     For i = 1 To max
         If Sheets("Res").Cells(i, maxTabs + 2) = oldTabs Then
-            Sheets("Res").Cells(i, maxTabs + 2) = "Удалён!"
+            Sheets("Res").Cells(i, maxTabs + 2) = "Удалён! (Есть в Уфа, но не найден в Access)"
             s = s + 1
+        Else
+            Sheets("Res").Cells(i, maxTabs + 2) = ""
         End If
     Next
     Sheets("Res").Cells(max, maxTabs + 2) = "Удалено:" + Str(s)

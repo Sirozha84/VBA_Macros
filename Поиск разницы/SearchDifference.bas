@@ -1,4 +1,6 @@
-Attribute VB_Name = "NewAndOldFind"
+Attribute VB_Name = "SearchDifference"
+'Версия 1.0 (19.12.2019)
+'Версия 1.2 (20.12.2019)
 'Версия 1.3 (23.12.2019) - Выделение кода из строки
 'Версия 1.4 (24.12.2019) - Оптимизация сообщений
 'Версия 1.5 (24.12.2019) - Поиск изменений
@@ -92,8 +94,6 @@ Private Sub AddDead(sheet)
             'Сравнение
             Change = False
             For k = 3 To 8
-                'If Sheets("Res").Cells(j, k) = "" Then Sheets("Res").Cells(j, k) = "_"
-                'If Sheets(sheet).Cells(i, k) = "" Then Sheets(sheet).Cells(i, k) = "_"
                 If Sheets("Res").Cells(j, k) <> Sheets(sheet).Cells(i, k) Then
                     Sheets("Res").Cells(j, k).Interior.Color = vbRed
                     Change = True

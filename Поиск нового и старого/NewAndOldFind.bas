@@ -1,25 +1,34 @@
 Attribute VB_Name = "NewAndOldFind"
 'Версия 1.3 (23.12.2019) - Выделение кода из строки
 'Версия 1.4 (24.12.2019) - Оптимизация сообщений
+'Версия 1.5 (24.12.2019) - Поиск изменений
+'Версия 1.6 (26.12.2019) - Рефакторинг
 
-Const fNew = 2          'Колонка в "Новой" таблице
-Const fOld = 4          'Колонка в "старых" таблицах
-Const newTab = "НомерТепло (УФА)"    '"Новая" таблица
-Const maxTabs = 5       'Максимум полей
+Const newTab = "Ноябрь"     'Новая таблица
+Const fNew = 1              'Колонка в "Новой" таблице
+Const oldTab = "Сентябрь"   'Старая таблица таблица
+Const fOld = 1              'Колонка в "старых" таблицах
+Const fields = 2            'Количество колонок для сравнени
+Const maxTabs = 8           'Максимум полей
 
 Global sn As Integer        'Счётчик новых строк
 Global max As Integer       'Счётчик строк всего
 Global oldTabs As Integer   'Счётчик старых таблиц
 
+
 Sub NewAndOldFind()
 
     MakeCopy
     
-    AddNew ("Вода")
-    AddNew ("Тепло")
+    'Поиск удалённых в новой таблице
+    AddDead (oldTab)
+    'Для сверки с другой таблицей добавить с именем сюда:
+    'AddNew ("")
     
-    FindDead ("Вода")
-    FindDead ("Тепло")
+    'Поиск новых записей
+    FindNew (oldTab)
+    'Для сверки с другой таблицей добавить с именем сюда:
+    'FindDead ("")
     
     DeadSum
     Message "Готово!"
@@ -48,8 +57,8 @@ Private Sub MakeCopy()
 
 End Sub
 
-'Поиск и добавления новых строк
-Private Sub AddNew(sheet)
+'Поиск и добавления удалённых строк
+Private Sub AddDead(sheet)
     
     'Находим максимум в старой таблице
     Message "Подсчёт строк..."
@@ -58,34 +67,62 @@ Private Sub AddNew(sheet)
         maxOld = maxOld + 1
     Loop
     
+    changed = 0
+    Find = False
+    
     For i = 2 To maxOld
-    
-        Call ProgressBar("Поиск новых", i, maxOld)
-    
-        Find = False
-        
+        Call ProgressBar("Поиск удалённых", i, maxOld)
         For j = 2 To max
-            If Sheets("Res").Cells(j, fNew) = Sheets(sheet).Cells(i, fOld) Then
-                Find = True
+            Find = True
+            For k = 0 To fields - 1
+                If Sheets("Res").Cells(j, fNew + k) <> Sheets(sheet).Cells(i, fOld + k) Then
+                    Find = False
+                    Exit For
+                End If
+            Next
+            If Find Then
                 Exit For
             End If
         Next
-        If Not Find Then
+        If Find Then
+            'Дополнительные действия при нахождении
+                
+                
+                
+            'Сравнение
+            Change = False
+            For k = 3 To 8
+                'If Sheets("Res").Cells(j, k) = "" Then Sheets("Res").Cells(j, k) = "_"
+                'If Sheets(sheet).Cells(i, k) = "" Then Sheets(sheet).Cells(i, k) = "_"
+                If Sheets("Res").Cells(j, k) <> Sheets(sheet).Cells(i, k) Then
+                    Sheets("Res").Cells(j, k).Interior.Color = vbRed
+                    Change = True
+                End If
+            Next
+            If Change Then
+                Sheets("Res").Cells(j, maxTabs + 3) = "Изменён"
+                changed = changed + 1
+            End If
+            
+            
+                
+        Else
             For c = 1 To maxTabs
                 Sheets("Res").Cells(max, c) = Sheets(sheet).Cells(i, c)
             Next
-            Sheets("Res").Cells(max, maxTabs + 1) = "Новый из " + sheet + " (Не найден в УФА)"
+            Sheets("Res").Cells(max, maxTabs + 2) = "Удалён (Был в" + sheet + ", но не стало в " + newTab + ")"
             max = max + 1
             sn = sn + 1
         End If
     Next
     
-    Sheets("Res").Cells(max, maxTabs + 1) = "Новых:" + Str(sn)
+    Sheets("Res").Cells(max + 1, maxTabs + 2) = "Удалено:" + Str(sn)
+    Sheets("Res").Cells(max + 1, maxTabs + 3) = "Изменено:" + Str(changed)
     
 End Sub
 
-'Поиск удалённых строк
-Private Sub FindDead(sheet)
+'Поиск новых строк
+Private Sub FindNew(sheet)
     
     oldTabs = oldTabs + 1
     
@@ -99,7 +136,7 @@ Private Sub FindDead(sheet)
     
     For i = 1 To max - sn - 1
         
-        Call ProgressBar("Поиск удалённых", i, max - sn - 1)
+        Call ProgressBar("Поиск новых", i, max - sn - 1)
         
         Find = False
         For j = 1 To maxOld
@@ -109,10 +146,10 @@ Private Sub FindDead(sheet)
             End If
         Next
         If Not Find Then
-            If Sheets("Res").Cells(i, maxTabs + 2) = "" Then
-                Sheets("Res").Cells(i, maxTabs + 2) = 1
+            If Sheets("Res").Cells(i, maxTabs + 1) = "" Then
+                Sheets("Res").Cells(i, maxTabs + 1) = 1
             Else
-                Sheets("Res").Cells(i, maxTabs + 2) = Val(Sheets("Res").Cells(i, maxTabs + 2)) + 1
+                Sheets("Res").Cells(i, maxTabs + 1) = Val(Sheets("Res").Cells(i, maxTabs + 1)) + 1
             End If
         End If
     Next
@@ -120,21 +157,21 @@ Private Sub FindDead(sheet)
     
 End Sub
 
-'Итог по удалённым
+'Итог по новым
 Private Sub DeadSum()
     
     Message "Завершение..."
     
     s = 0
     For i = 1 To max
-        If Sheets("Res").Cells(i, maxTabs + 2) = oldTabs Then
-            Sheets("Res").Cells(i, maxTabs + 2) = "Удалён! (Есть в Уфа, но не найден в Access)"
+        If Sheets("Res").Cells(i, maxTabs + 1) = oldTabs Then
+            Sheets("Res").Cells(i, maxTabs + 1) = "Новый! (Появился в " + newTab + ", раньше не встречался)"
             s = s + 1
         Else
-            Sheets("Res").Cells(i, maxTabs + 2) = ""
+            Sheets("Res").Cells(i, maxTabs + 1) = ""
         End If
     Next
-    Sheets("Res").Cells(max, maxTabs + 2) = "Удалено:" + Str(s)
+    Sheets("Res").Cells(max + 1, maxTabs + 1) = "Новых:" + Str(s)
     
 End Sub
 
@@ -153,6 +190,8 @@ Private Sub Message(text As String)
     Application.StatusBar = text
     Application.ScreenUpdating = False
 End Sub
+
+
 
 'Выделение кода из строки и помещение его в отдельную ячейку
 Sub CodeEject()

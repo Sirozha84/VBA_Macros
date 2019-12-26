@@ -1,8 +1,15 @@
+Attribute VB_Name = "Find"
 'Версия 1.0 (11.12.2010)
 'Версия 1.1 (12.12.2019) - Значительно повышена скорость работы
 
-Attribute VB_Name = "Find"
-Sub Find()
+Sub Start()
+    
+    Filter
+
+End Sub
+
+'Фильтрация по выпадающим
+Private Sub Filter()
     
     rang = 200000   'Максимальная строчка в исходнике
     src = "10.2019" 'Страница с исходником
@@ -38,12 +45,7 @@ Sub Find()
     f = 1
     For i = 2 To rang
         If Sheets(src).Cells(i, 1) = "" Then Exit For
-        If (i Mod 100) = 0 Then
-            Application.ScreenUpdating = True
-            Sheets(res).Cells(1, 1) = "Обработано:" + Str(i) + " из" + Str(rec) + _
-                " (" + Str(i / rec * 100) + " % )    Найдено:" + Str(f)
-            Application.ScreenUpdating = False
-        End If
+        Call StatusBar("Обработано", i, rec)
         
         'fnd = False 'IsInArray(Sheets(src).Cells(i, 8), tmp)
         fnd = False
@@ -74,3 +76,14 @@ Sub Find()
     
 End Sub
 
+Private Sub ProgressBar(text As String, cur As Integer, all As Integer)
+    If cur Mod 50 = 0 Then
+        Message text + ":" + cur + "из" + all + "(" + Str(Int(cur / all * 100)) + "%"
+    End If
+End Sub
+
+Private Sub Message(text As String)
+    Application.ScreenUpdating = True
+    Application.StatusBar = text
+    Application.ScreenUpdating = False
+End Sub

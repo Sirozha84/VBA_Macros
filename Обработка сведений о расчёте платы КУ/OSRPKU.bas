@@ -11,13 +11,11 @@ Public max As Long          'Количество строк всего
 
 Sub Start()
     
-    Prepare
+    tabs = 17 'Временно, удалить
+    max = 105147 'Времеено, удалить
     
-    'tabs = 17 'Временно, удалить
-    'max = 175407 'Времеено, удалить
-    
-    Filter
-    
+    'Prepare
+    'Filter
     YearsFloors
     
     Message "Готово!"
@@ -120,7 +118,36 @@ End Sub
 
 'Подстановка года постройки и этажности
 Private Sub YearsFloors()
-
+    Sheets(resultSh).Cells(1, tabs + 1) = "Год постройки"
+    Sheets(resultSh).Cells(1, tabs + 2) = "Этажность"
+    last = ""
+    yr = 0
+    floors = 0
+    For i = 2 To max
+        If i Mod 100 = 0 Then Call ProgressBar("Обработано", i, max)
+        adr = Sheets(resultSh).Cells(i, 1) + "," + _
+              Sheets(resultSh).Cells(i, 2) + "," + _
+              Sheets(resultSh).Cells(i, 3)
+        If adr <> last Then
+            last = adr
+            
+            'Поиск
+            j = 4
+            Do While Sheets(adrSh).Cells(j, 1) <> ""
+                inBook = Sheets(adrSh).Cells(j, 1) + "," + _
+                       Sheets(adrSh).Cells(j, 2) + "," + _
+                       Right(Str(Sheets(adrSh).Cells(j, 3)), Len(Str(Sheets(adrSh).Cells(j, 3))) - 1)
+                If adr = inBook Then
+                    yr = Sheets(adrSh).Cells(j, 9)
+                    floors = Sheets(adrSh).Cells(j, 8)
+                    Exit Do
+                End If
+                j = j + 1
+            Loop
+        End If
+        Sheets(resultSh).Cells(i, tabs + 1) = yr
+        Sheets(resultSh).Cells(i, tabs + 2) = floors
+    Next
 End Sub
 
 'Рисование прогресса, text - имя, cur - текущее значение, all - всего, отображать каждые over штук

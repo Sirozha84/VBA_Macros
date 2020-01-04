@@ -21,11 +21,11 @@ End Type
 
 Sub Start()
 
-'max = 175407
-'tabs = 24
+max = 176019
+tabs = 24 '17-24
 
-    DataCollection
-    AdressMatching
+    'DataCollection
+    'AdressMatching
     Filter
     
     Message "Готово!"
@@ -71,7 +71,7 @@ End Sub
 
 'Сопоставление со справочником адресов
 Private Sub AdressMatching()
-
+    
     'Индексация
     
     Message "Индексация адресов"
@@ -80,11 +80,11 @@ Private Sub AdressMatching()
     iMax = 1
     i = 4
     ReDim indexes(iMax) As adrIndex
-    indexes(iMax).adr = Cells(i, 1) + Cells(i, 2) + CStr(Cells(i, 3))
+    indexes(iMax).adr = PrepareAdress(Cells(i, 1) + Cells(i, 2) + CStr(Cells(i, 3)))
     indexes(iMax).iStart = i
     indexes(iMax).iEnd = i
     Do While Cells(i, 1) <> ""
-        If indexes(iMax).adr = Cells(i, 1) + Cells(i, 2) + CStr(Cells(i, 3)) Then
+        If indexes(iMax).adr = PrepareAdress(Cells(i, 1) + Cells(i, 2) + CStr(Cells(i, 3))) Then
             indexes(iMax).iEnd = i
         Else
             iMax = iMax + 1
@@ -110,8 +110,8 @@ Private Sub AdressMatching()
     For i = 2 To max
         If i Mod 500 = 0 Then Call ProgressBar("Этап 2: Сопоставление со справочником", i, max)
         Find = False
+        adr = PrepareAdress(Cells(i, 1) + Cells(i, 2) + CStr(Cells(i, 3)))
         For j = 1 To iMax
-            adr = PrepareAdress(Cells(i, 1) + Cells(i, 2) + CStr(Cells(i, 3)))
             If adr = indexes(j).adr Then
                 Find = True
                 Exit For
@@ -119,9 +119,10 @@ Private Sub AdressMatching()
         Next
         If Find Then
             For k = indexes(j).iStart To indexes(j).iEnd
-                If CStr(Cells(i, 4)) = CStr(Sheets(adrSh).Cells(k, 4)) And _
+                'If CStr(Cells(i, 4)) = CStr(Sheets(adrSh).Cells(k, 4)) And
+                If LCase(CStr(Cells(i, 4))) = LCase(CStr(Sheets(adrSh).Cells(k, 4))) And _
                    CStr(Cells(i, 5)) = CStr(Sheets(adrSh).Cells(k, 5)) And _
-                   CStr(Cells(i, 6)) = CStr(Sheets(adrSh).Cells(k, 6)) Then
+                   Replace(CStr(Cells(i, 6)), "Б", "") = CStr(Sheets(adrSh).Cells(k, 6)) Then
                     For l = 0 To 6
                         Cells(i, tabs + 1 + l) = Sheets(adrSh).Cells(k, 8 + l)
                     Next
@@ -145,6 +146,7 @@ Private Sub Filter()
     c_adr = 8       'Поле с адресом
     c_usl = 17      'Поле с услугой
     c_vip = 15      'Выпадающий доход
+    c_LS = 7        'Лицевой счёт
     
     ReDim tmp(max) As String
     Sheets(resultSh).Select
@@ -155,11 +157,9 @@ Private Sub Filter()
     mx = 1 'Число отфильтрованных строк
     For i = 2 To max
         If i Mod 5000 = 0 Then Call ProgressBar("Этап 3: Фильтрация", i, max)
-        If Sheets(tempSh).Cells(i, c_usl) = "Отопление" And Sheets(tempSh).Cells(i, c_vip) <> 0 Then
-            tmp(mx) = Sheets(tempSh).Cells(i, 1) + "," + _
-                      Sheets(tempSh).Cells(i, 2) + "," + _
-                      CStr(Sheets(tempSh).Cells(i, 3))
-            'Sheets(tempSh).Cells(i, 20) = tmp(mx)
+        If Sheets(tempSh).Cells(i, c_vip) <> 0 And _
+           Sheets(tempSh).Cells(i, c_usl) = "Отопление" Then
+            tmp(mx) = Sheets(tempSh).Cells(i, c_LS)
             mx = mx + 1
         End If
     Next
@@ -172,21 +172,18 @@ Private Sub Filter()
         Cells(1, i) = Sheets(tempSh).Cells(1, i)
     Next
     f = 1
-    Dim adr As String
+    Dim LS As String
     For i = 2 To max
-        If Sheets(tempSh).Cells(i, 1) = "" Then Exit For
         If i Mod 1000 = 0 Then Call ProgressBar("Этап 4: Подбор", i, max)
         fnd = False
-        adr = Sheets(tempSh).Cells(i, 1) + "," + _
-              Sheets(tempSh).Cells(i, 2) + "," + _
-              CStr(Sheets(tempSh).Cells(i, 3))
-        If adr = last Then
+        LS = Sheets(tempSh).Cells(i, c_LS)
+        If LS = last Then
             fnd = True
         Else
             For j = 2 To mx
-                If adr = tmp(j) Then
+                If LS = tmp(j) Then
                     fnd = True
-                    last = adr
+                    last = LS
                     Exit For
                 End If
             Next
@@ -199,50 +196,6 @@ Private Sub Filter()
         End If
     Next
 
-    
-End Sub
-
-
-
-
-
-'Подстановка года постройки и этажности
-Private Sub YearsFloorsSlow()
-    
-    Message "Подготовка"
-    
-    Sheets(adrSh).Select
-    i = 4
-    Do While Cells(i, 1) <> ""
-        i = i + 1
-    Loop
-    aMax = i - 1
-    
-    ReDim adresses(1 To aMax + 1) As String
-    
-    For i = 4 To aMax
-        adresses(i) = Cells(i, 1) + Cells(i, 2) + CStr(Cells(i, 3)) + Cells(i, 4) + "," + _
-        CStr(Cells(i, 5)) + "," + CStr(Cells(i, 6))
-    Next
-    
-    Sheets(resultSh).Select
-    For j = 0 To 6
-        Cells(1, tabs + 2 + j) = Sheets(adrSh).Cells(2, 8 + j)
-    Next
-    For i = 2 To max
-        If i Mod 100 = 0 Then Call ProgressBar("Этап 4: Сопоставление со справочником", i, max)
-        adr = Cells(i, 1) + Cells(i, 2) + CStr(Cells(i, 3)) + Cells(i, 4) + "," + _
-        CStr(Cells(i, 5)) + "," + CStr(Cells(i, 6))
-
-        adresses(aMax + 1) = adr
-       
-        z = WorksheetFunction.Match(adr, adresses, 0)
-        If z < max + 1 Then
-            For j = 0 To 6
-                Sheets(resultSh).Cells(i, tabs + 2 + j) = Sheets(adrSh).Cells(z, 8 + j)
-            Next
-        End If
-    Next
     
 End Sub
 

@@ -4,6 +4,7 @@ Attribute VB_Name = "OSRPKU"
 'Версия 1.2 (30.12.2019) - Подстановка этажности и года постройки из справочника
 'Версия 1.3 (03.01.2020) - Подстановка остальных данных из справочника "Адреса",
 '   оптимизация поиска (ускоряет значительно, но не не так как хотелось бы
+'Версия 1.4 (04.01.2020) - Оптимизация и улучшение сопоставления ("ё"/"е", большие/маленькие буквы)
 
 Const adrSh = "Adresses"
 Const tempSh = "Temp"
@@ -20,19 +21,20 @@ End Type
 
 Sub Start()
 
-'max = 170147 '175407
-'tabs = 16
-    
-    Prepare
+'max = 175407
+'tabs = 24
+
+    DataCollection
+    AdressMatching
     Filter
-    YearsFloors
     
     Message "Готово!"
     
 End Sub
 
-'Подготовка
-Private Sub Prepare()
+'Сбор данных со всех таблиц
+Private Sub DataCollection()
+    
     CreateSheet tempSh
     Dim iWS As Worksheet
     s = 1
@@ -64,7 +66,78 @@ Private Sub Prepare()
     Next iWS
     max = max - 1
     CreateSheet resultSh
+    
 End Sub
+
+'Сопоставление со справочником адресов
+Private Sub AdressMatching()
+
+    'Индексация
+    
+    Message "Индексация адресов"
+    
+    Sheets(adrSh).Select
+    iMax = 1
+    i = 4
+    ReDim indexes(iMax) As adrIndex
+    indexes(iMax).adr = Cells(i, 1) + Cells(i, 2) + CStr(Cells(i, 3))
+    indexes(iMax).iStart = i
+    indexes(iMax).iEnd = i
+    Do While Cells(i, 1) <> ""
+        If indexes(iMax).adr = Cells(i, 1) + Cells(i, 2) + CStr(Cells(i, 3)) Then
+            indexes(iMax).iEnd = i
+        Else
+            iMax = iMax + 1
+            ReDim Preserve indexes(iMax) As adrIndex
+            indexes(iMax).adr = PrepareAdress(Cells(i, 1) + Cells(i, 2) + CStr(Cells(i, 3)))
+            indexes(iMax).iStart = i
+            indexes(iMax).iEnd = i
+        End If
+        i = i + 1
+    Loop
+    'For i = 1 To iMax
+    '    Cells(i, 25) = indexes(i).adr
+    '    Cells(i, 26) = indexes(i).iStart
+    '    Cells(i, 27) = indexes(i).iEnd
+    'Next
+    
+    'Поиск
+    
+    Sheets(tempSh).Select
+    For j = 0 To 6
+        Cells(1, tabs + 1 + j) = Sheets(adrSh).Cells(2, 8 + j)
+    Next
+    For i = 2 To max
+        If i Mod 500 = 0 Then Call ProgressBar("Этап 2: Сопоставление со справочником", i, max)
+        Find = False
+        For j = 1 To iMax
+            adr = PrepareAdress(Cells(i, 1) + Cells(i, 2) + CStr(Cells(i, 3)))
+            If adr = indexes(j).adr Then
+                Find = True
+                Exit For
+            End If
+        Next
+        If Find Then
+            For k = indexes(j).iStart To indexes(j).iEnd
+                If CStr(Cells(i, 4)) = CStr(Sheets(adrSh).Cells(k, 4)) And _
+                   CStr(Cells(i, 5)) = CStr(Sheets(adrSh).Cells(k, 5)) And _
+                   CStr(Cells(i, 6)) = CStr(Sheets(adrSh).Cells(k, 6)) Then
+                    For l = 0 To 6
+                        Cells(i, tabs + 1 + l) = Sheets(adrSh).Cells(k, 8 + l)
+                    Next
+                    Exit For
+                End If
+            Next
+        End If
+    Next
+    tabs = tabs + 7
+    
+End Sub
+
+Private Function PrepareAdress(adr As String) As String
+    adr = LCase(adr)
+    PrepareAdress = Replace(adr, "ё", "е")
+End Function
 
 'Фильтрация по выпадающим
 Private Sub Filter()
@@ -74,13 +147,14 @@ Private Sub Filter()
     c_vip = 15      'Выпадающий доход
     
     ReDim tmp(max) As String
-    
+    Sheets(resultSh).Select
     Sheets(resultSh).Cells.Clear
     
     'Делаем временный фильтрованный список
+    
     mx = 1 'Число отфильтрованных строк
     For i = 2 To max
-        If i Mod 1000 = 0 Then Call ProgressBar("Этап 2: Фильтрация", i, max)
+        If i Mod 5000 = 0 Then Call ProgressBar("Этап 3: Фильтрация", i, max)
         If Sheets(tempSh).Cells(i, c_usl) = "Отопление" And Sheets(tempSh).Cells(i, c_vip) <> 0 Then
             tmp(mx) = Sheets(tempSh).Cells(i, 1) + "," + _
                       Sheets(tempSh).Cells(i, 2) + "," + _
@@ -91,12 +165,17 @@ Private Sub Filter()
     Next
     mx = mx - 1
     
-    'Ищем Данные, которые подходят под фильтр
+    'Подбор Данных, которые подходят под фильтр
+    
+    'Шапка
+    For i = 1 To tabs
+        Cells(1, i) = Sheets(tempSh).Cells(1, i)
+    Next
     f = 1
     Dim adr As String
     For i = 2 To max
         If Sheets(tempSh).Cells(i, 1) = "" Then Exit For
-        If i Mod 1000 = 0 Then Call ProgressBar("Этап 3: Подбор", i, max)
+        If i Mod 1000 = 0 Then Call ProgressBar("Этап 4: Подбор", i, max)
         fnd = False
         adr = Sheets(tempSh).Cells(i, 1) + "," + _
               Sheets(tempSh).Cells(i, 2) + "," + _
@@ -114,84 +193,17 @@ Private Sub Filter()
         End If
         If fnd Then
             For c = 1 To tabs
-                Sheets(resultSh).Cells(f + 1, c) = Sheets(tempSh).Cells(i, c)
+                Cells(f + 1, c) = Sheets(tempSh).Cells(i, c)
             Next
             f = f + 1
         End If
     Next
-    
-    'Копируем шапку
-    For i = 1 To tabs
-        Sheets(resultSh).Cells(1, i) = Sheets(tempSh).Cells(1, i)
-    Next
+
     
 End Sub
 
 
-Private Sub YearsFloors()
 
-'max = 170147
-'эtabs = 16
-    
-    'Индексация
-    
-    Message "Индексация адресов"
-    
-    Sheets(adrSh).Select
-    iMax = 1
-    i = 4
-    ReDim indexes(iMax) As adrIndex
-    indexes(iMax).adr = Cells(i, 1) + Cells(i, 2) + CStr(Cells(i, 3))
-    indexes(iMax).iStart = i
-    indexes(iMax).iEnd = i
-    Do While Cells(i, 1) <> ""
-        If indexes(iMax).adr = Cells(i, 1) + Cells(i, 2) + CStr(Cells(i, 3)) Then
-            indexes(iMax).iEnd = i
-        Else
-            iMax = iMax + 1
-            ReDim Preserve indexes(max) As adrIndex
-            indexes(iMax).adr = Cells(i, 1) + Cells(i, 2) + CStr(Cells(i, 3))
-            indexes(iMax).iStart = i
-            indexes(iMax).iEnd = i
-        End If
-        i = i + 1
-    Loop
-    'For i = 1 To iMax
-    '    Cells(i, 25) = indexes(i).adr
-    '    Cells(i, 26) = indexes(i).iStart
-    '    Cells(i, 27) = indexes(i).iEnd
-    'Next
-    
-    'Поиск
-    
-    Sheets(resultSh).Select
-    For j = 0 To 6
-        Cells(1, tabs + 2 + j) = Sheets(adrSh).Cells(2, 8 + j)
-    Next
-    For i = 2 To max
-        If i Mod 1000 = 0 Then Call ProgressBar("Этап 4: Сопоставление со справочником", i, max)
-        Find = False
-        For j = 1 To iMax
-            If indexes(j).adr = Cells(i, 1) + Cells(i, 2) + CStr(Cells(i, 3)) Then
-                Find = True
-                Exit For
-            End If
-        Next
-        If Find Then
-            For k = indexes(j).iStart To indexes(j).iEnd
-                If Cells(i, 4) = Sheets(adrSh).Cells(k, 4) And _
-                   Cells(i, 5) = Sheets(adrSh).Cells(k, 5) And _
-                   Cells(i, 6) = Sheets(adrSh).Cells(k, 6) Then
-                    For l = 0 To 6
-                        Cells(i, tabs + 2 + l) = Sheets(adrSh).Cells(k, 8 + l)
-                    Next
-                    Exit For
-                End If
-            Next
-        End If
-    Next
-    
-End Sub
 
 
 'Подстановка года постройки и этажности

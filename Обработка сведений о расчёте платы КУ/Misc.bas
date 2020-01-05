@@ -18,13 +18,14 @@ End Sub
 'Подбор коэффициентов
 Sub Koef()
     col = 25
-    max = 88389
+    max = 153519
+    Sheets("Result").Select
     For i = 1 To max
         If i Mod 1000 = 0 Then Call ProgressBar("Подбор коэффициентов", i, max)
         adr = Cells(i, 2) + CStr(Cells(i, 3)) + Cells(i, 4)
         For j = 1 To 1148
-            If adr = Sheets("Counter").Cells(j, 5) Then
-                Cells(i, col) = Sheets("Counter").Cells(j, 6)
+            If adr = Sheets("Adresses").Cells(j, 15) Then
+                Cells(i, col) = Sheets("Adresses").Cells(j, 16)
                 Exit For
             End If
         Next

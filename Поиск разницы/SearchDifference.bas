@@ -19,11 +19,11 @@ Global max As Integer       'Счётчик строк всего
 Global oldTabs As Integer   'Счётчик старых таблиц
 
 
-Sub NewAndOldFind()
+Sub Start()
 
     MakeCopy
-    AddDead (oldTab)
-    FindNew (oldTab)
+    AddDead
+    FindNew
     Message "Готово!"
     
 End Sub
@@ -51,12 +51,12 @@ Private Sub MakeCopy()
 End Sub
 
 'Поиск и добавления удалённых строк
-Private Sub AddDead(sheet)
+Private Sub AddDead()
     
     'Находим максимум в старой таблице
     Message "Подсчёт строк..."
     maxOld = 0
-    Do Until Sheets(sheet).Cells(maxOld + 1, 1) = ""
+    Do Until Sheets(oldTab).Cells(maxOld + 1, 1) = ""
         maxOld = maxOld + 1
     Loop
     
@@ -69,7 +69,7 @@ Private Sub AddDead(sheet)
         For j = 2 To max
             Find = True
             For k = 0 To fields - 1
-                If Sheets("Res").Cells(j, fNew + k) <> Sheets(sheet).Cells(i, fOld + k) Then
+                If Sheets("Res").Cells(j, fNew + k) <> Sheets(oldTab).Cells(i, fOld + k) Then
                     Find = False
                     Exit For
                 End If
@@ -85,9 +85,9 @@ Private Sub AddDead(sheet)
                 
             'Сравнение
             s = 3
-            Sheets("Res").Cells(j, s + 1) = Sheets(sheet).Cells(i, s)
+            Sheets("Res").Cells(j, s + 1) = Sheets(oldTab).Cells(i, s)
             i1 = Sheets("Res").Cells(j, s)
-            i2 = Sheets(sheet).Cells(i, s)
+            i2 = Sheets(oldTab).Cells(i, s)
             rz = Round(i1 - i2, 2)
             Sheets("Res").Cells(j, s + 2) = rz
             If Abs(rz) = 0 Then
@@ -115,9 +115,9 @@ Private Sub AddDead(sheet)
         Else
             max = max + 1
             For c = 1 To maxTabs
-                Sheets("Res").Cells(max, c) = Sheets(sheet).Cells(i, c)
+                Sheets("Res").Cells(max, c) = Sheets(oldTab).Cells(i, c)
             Next
-            Sheets("Res").Cells(max, maxTabs + 5) = "Удалён (Был в " + sheet + ", но не стало в " + newTab + ")"
+            Sheets("Res").Cells(max, maxTabs + 5) = "Удалён (Был в " + oldTab + ", но не стало в " + newTab + ")"
             sn = sn + 1
         End If
     Next
@@ -129,12 +129,12 @@ Private Sub AddDead(sheet)
 End Sub
 
 'Поиск новых строк
-Private Sub FindNew(sheet)
+Private Sub FindNew()
     
     'Находим максимум в старой таблице
     Message "Подсчёт строк..."
     maxOld = 0
-    Do Until Sheets(sheet).Cells(maxOld + 1, 1) = ""
+    Do Until Sheets(oldTab).Cells(maxOld + 1, 1) = ""
         maxOld = maxOld + 1
     Loop
     
@@ -145,7 +145,7 @@ Private Sub FindNew(sheet)
         
         Find = False
         For j = 2 To maxOld
-            If Sheets("Res").Cells(i, fNew) = Sheets(sheet).Cells(j, fOld) Then
+            If Sheets("Res").Cells(i, fNew) = Sheets(oldTab).Cells(j, fOld) Then
                 Find = True
                 Exit For
             End If
@@ -159,6 +159,7 @@ Private Sub FindNew(sheet)
     
 End Sub
 
+'Вывод статуса обработки
 Private Sub ProgressBar(text As String, ByVal cur As Integer, ByVal all As Integer)
     If cur Mod 50 = 0 Then
         Application.ScreenUpdating = True
@@ -175,60 +176,4 @@ Private Sub Message(text As String)
     Application.ScreenUpdating = False
 End Sub
 
-'Выделение кода из строки и помещение его в отдельную ячейку
-Sub CodeEject()
-    
-    codeFrom = 1
-    codeTo = 5
 
-    Application.ScreenUpdating = True
-    Application.StatusBar = "Подсчёт строк..."
-    Application.ScreenUpdating = False
-    max = 1
-    Do Until Cells(max + 1, 1) = ""
-        max = max + 1
-    Loop
-    
-    For i = 2 To max
-        Call ProgressBar("Обработка", i, max)
-        c = Cells(i, codeFrom)
-        If InStr(1, c, "код: ", vbTextCompare) Then
-            ss = Split(c, "код: ")
-            If UBound(ss) > 0 Then
-                c = Replace(ss(1), " ", "")
-                kv = InStr(1, c, """", vbTextCompare)
-                If kv > 0 Then c = Left(c, kv - 1)
-            End If
-        End If
-        If InStr(1, c, "Код Объекта: ", vbTextCompare) Then
-            ss = Split(c, "Код Объекта: ")
-            If UBound(ss) > 0 Then
-                c = Replace(ss(1), " ", "")
-                kv = InStr(1, c, """", vbTextCompare)
-                If kv > 0 Then c = Left(s, kv - 1)
-            End If
-        End If
-        If InStr(1, c, "(", vbTextCompare) Then
-            ss = Split(c, "(")
-            If UBound(ss) > 0 Then
-                c = Replace(ss(1), " ", "")
-                kv = InStr(1, c, "(", vbTextCompare)
-                If kv > 0 Then c = Left(c, kv - 1)
-                kv = InStr(1, c, ")", vbTextCompare)
-                If kv > 0 Then c = Left(c, kv - 1)
-            End If
-        End If
-        
-        'Перед записью надо проверить всё ли то что нашли цифры
-        d = True
-        For j = 1 To Len(c)
-            code = Asc(Mid(c, j, 1))
-            If code < 48 Or code > 57 Then d = False
-        Next
-        If Not d Then c = ""
-        Cells(i, codeTo) = c
-    Next
-    
-    Message "Готово!"
-
-End Sub

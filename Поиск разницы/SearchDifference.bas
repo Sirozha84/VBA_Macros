@@ -5,13 +5,14 @@ Attribute VB_Name = "SearchDifference"
 'Версия 1.4 (24.12.2019) - Оптимизация сообщений
 'Версия 1.5 (24.12.2019) - Поиск изменений
 'Версия 1.6 (26.12.2019) - Рефакторинг
+'Версия 1.7 (10.01.2020) - Вычисление разницы
 
-Const newTab = "Ноябрь"     'Новая таблица
+Const newTab = "УФА"     'Новая таблица
 Const fNew = 1              'Колонка в "Новой" таблице
-Const oldTab = "Сентябрь"   'Старая таблица таблица
+Const oldTab = "Access"     'Старая таблица таблица
 Const fOld = 1              'Колонка в "старых" таблицах
-Const fields = 2            'Количество колонок для сравнени
-Const maxTabs = 8           'Максимум полей
+Const fields = 1            'Количество колонок для сравнени
+Const maxTabs = 3           'Максимум полей
 
 Global sn As Integer        'Счётчик новых строк
 Global max As Integer       'Счётчик строк всего
@@ -21,18 +22,8 @@ Global oldTabs As Integer   'Счётчик старых таблиц
 Sub NewAndOldFind()
 
     MakeCopy
-    
-    'Поиск удалённых в новой таблице
     AddDead (oldTab)
-    'Для сверки с другой таблицей добавить с именем сюда:
-    'AddNew ("")
-    
-    'Поиск новых записей
     FindNew (oldTab)
-    'Для сверки с другой таблицей добавить с именем сюда:
-    'FindDead ("")
-    
-    DeadSum
     Message "Готово!"
     
 End Sub
@@ -69,9 +60,10 @@ Private Sub AddDead(sheet)
         maxOld = maxOld + 1
     Loop
     
+    mached = 0
     changed = 0
-    Find = False
     
+    Find = False
     For i = 2 To maxOld
         Call ProgressBar("Поиск удалённых", i, maxOld)
         For j = 2 To max
@@ -92,39 +84,52 @@ Private Sub AddDead(sheet)
                 
                 
             'Сравнение
-            Change = False
-            For k = 3 To 8
-                If Sheets("Res").Cells(j, k) <> Sheets(sheet).Cells(i, k) Then
-                    Sheets("Res").Cells(j, k).Interior.Color = vbRed
-                    Change = True
-                End If
-            Next
-            If Change Then
-                Sheets("Res").Cells(j, maxTabs + 3) = "Изменён"
+            s = 3
+            Sheets("Res").Cells(j, s + 1) = Sheets(sheet).Cells(i, s)
+            i1 = Sheets("Res").Cells(j, s)
+            i2 = Sheets(sheet).Cells(i, s)
+            rz = Round(i1 - i2, 2)
+            Sheets("Res").Cells(j, s + 2) = rz
+            If Abs(rz) = 0 Then
+                Sheets("Res").Cells(j, s + 0).Interior.Color = RGB(128, 255, 128)
+                Sheets("Res").Cells(j, s + 1).Interior.Color = RGB(128, 255, 128)
+                Sheets("Res").Cells(j, s + 2).Interior.Color = RGB(196, 255, 196)
+                mached = mached + 1
+                Sheets("Res").Cells(j, maxTabs + 5) = "Совпал"
+            End If
+            If Abs(rz) > 0 Then
+                Sheets("Res").Cells(j, s + 0).Interior.Color = RGB(255, 255, 128)
+                Sheets("Res").Cells(j, s + 1).Interior.Color = RGB(255, 255, 128)
+                Sheets("Res").Cells(j, s + 2).Interior.Color = RGB(255, 255, 196)
+                mached = mached + 1
+                Sheets("Res").Cells(j, maxTabs + 5) = "Совпал (почти)"
+            End If
+            If Abs(rz) > 10 Then
+                Sheets("Res").Cells(j, s + 0).Interior.Color = RGB(255, 128, 128)
+                Sheets("Res").Cells(j, s + 1).Interior.Color = RGB(255, 128, 128)
+                Sheets("Res").Cells(j, s + 2).Interior.Color = RGB(255, 196, 196)
                 changed = changed + 1
+                Sheets("Res").Cells(j, maxTabs + 5) = "Изменён"
             End If
             
-            
-                
         Else
+            max = max + 1
             For c = 1 To maxTabs
                 Sheets("Res").Cells(max, c) = Sheets(sheet).Cells(i, c)
             Next
-            Sheets("Res").Cells(max, maxTabs + 2) = "Удалён (Был в" + sheet + ", но не стало в " + newTab + ")"
-            max = max + 1
+            Sheets("Res").Cells(max, maxTabs + 5) = "Удалён (Был в " + sheet + ", но не стало в " + newTab + ")"
             sn = sn + 1
         End If
     Next
     
-    Sheets("Res").Cells(max + 1, maxTabs + 2) = "Удалено:" + Str(sn)
-    Sheets("Res").Cells(max + 1, maxTabs + 3) = "Изменено:" + Str(changed)
+    Sheets("Res").Cells(max + 3, maxTabs + 5) = "Удалено:" + Str(sn)
+    Sheets("Res").Cells(max + 4, maxTabs + 5) = "Совпало:" + Str(mached)
+    Sheets("Res").Cells(max + 5, maxTabs + 5) = "Изменено:" + Str(changed)
     
 End Sub
 
 'Поиск новых строк
 Private Sub FindNew(sheet)
-    
-    oldTabs = oldTabs + 1
     
     'Находим максимум в старой таблице
     Message "Подсчёт строк..."
@@ -133,45 +138,24 @@ Private Sub FindNew(sheet)
         maxOld = maxOld + 1
     Loop
     
-    
-    For i = 1 To max - sn - 1
+    s = 0
+    For i = 2 To max - sn
         
         Call ProgressBar("Поиск новых", i, max - sn - 1)
         
         Find = False
-        For j = 1 To maxOld
+        For j = 2 To maxOld
             If Sheets("Res").Cells(i, fNew) = Sheets(sheet).Cells(j, fOld) Then
                 Find = True
                 Exit For
             End If
         Next
         If Not Find Then
-            If Sheets("Res").Cells(i, maxTabs + 1) = "" Then
-                Sheets("Res").Cells(i, maxTabs + 1) = 1
-            Else
-                Sheets("Res").Cells(i, maxTabs + 1) = Val(Sheets("Res").Cells(i, maxTabs + 1)) + 1
-            End If
-        End If
-    Next
-    
-    
-End Sub
-
-'Итог по новым
-Private Sub DeadSum()
-    
-    Message "Завершение..."
-    
-    s = 0
-    For i = 1 To max
-        If Sheets("Res").Cells(i, maxTabs + 1) = oldTabs Then
-            Sheets("Res").Cells(i, maxTabs + 1) = "Новый! (Появился в " + newTab + ", раньше не встречался)"
+            Sheets("Res").Cells(i, maxTabs + 5) = "Новый! (Появился в " + newTab + ")"
             s = s + 1
-        Else
-            Sheets("Res").Cells(i, maxTabs + 1) = ""
         End If
     Next
-    Sheets("Res").Cells(max + 1, maxTabs + 1) = "Новых:" + Str(s)
+    Sheets("Res").Cells(max + 2, maxTabs + 5) = "Новых:" + Str(s)
     
 End Sub
 
@@ -190,8 +174,6 @@ Private Sub Message(text As String)
     Application.StatusBar = text
     Application.ScreenUpdating = False
 End Sub
-
-
 
 'Выделение кода из строки и помещение его в отдельную ячейку
 Sub CodeEject()

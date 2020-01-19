@@ -4,11 +4,12 @@ Sub PrepareTabFromAccess()
     
     Message "Подсчёт строк..."
     max = 1
+    
     Do Until Cells(max + 1, 1) = ""
         max = max + 1
     Loop
     
-    For i = 2 To max
+    For i = 2 To max + 5
         
         Call ProgressBar("Обработка", i, max)
         
@@ -29,16 +30,34 @@ Sub PrepareTabFromAccess()
         Cells(i, 1) = Replace(Cells(i, 1), "муниципальный ", "")
         Cells(i, 1) = Replace(Cells(i, 1), "мцниципальный ", "")
         
+        'Убирание нолей
+        s = Cells(i, 1)
+        If s <> "" Then
+            Do While Left(s, 1) = "0"
+                s = Right(s, Len(s) - 1)
+            Loop
+            Cells(i, 1) = s
+        End If
+        
         'Убирание "рублей"
-        'Cells(i, 3) = Replace(Cells(i, 3), "р.", "")
-        'эCells(i, 3).NumberFormat = "General"
-        'Пока уберу, хер знает потом как их обратно в число перевести
+        s = Replace(Cells(i, 3), "р.", "")
+        If s <> "" Then Cells(i, 3) = CDbl(s)
         
         'Ссумирование НДС (если есть)
         If Cells(1, 4) = -1 Then
             Cells(i, 3) = Cells(i, 3) + Cells(i, 4)
             Cells(i, 4) = ""
         End If
+        
+        'Схлопывание
+        If Cells(i, 1) <> "" And Cells(i, 1) <> "." And Cells(i, 1) = Cells(i + 1, 1) Then
+           Cells(i, 3) = Cells(i, 3) + Cells(i + 1, 3)
+           Rows(i + 1).EntireRow.Delete
+           i = i - 1
+        End If
+        
+        'Чистка хвостов
+        If Cells(i, 1) = "" Then Rows(i).EntireRow.Delete
         
     Next
     
@@ -104,7 +123,7 @@ End Sub
 
 'Вывод статуса обработки
 Private Sub ProgressBar(text As String, ByVal cur As Integer, ByVal all As Integer)
-    If cur Mod 50 = 0 Then
+    If cur Mod 100 = 0 Then
         Application.ScreenUpdating = True
         Application.StatusBar = text + ":" + _
             Str(cur) + " из" + Str(all) + " (" + Str(Int(cur / all * 100)) + "% )"

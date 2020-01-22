@@ -9,7 +9,7 @@ Sub PrepareTabFromAccess()
         max = max + 1
     Loop
     
-    For i = 2 To max + 5
+    For i = 2 To max
         
         Call ProgressBar("Обработка", i, max)
         
@@ -48,7 +48,11 @@ Sub PrepareTabFromAccess()
             Cells(i, 3) = Cells(i, 3) + Cells(i, 4)
             Cells(i, 4) = ""
         End If
-        
+
+    Next	
+
+    For i = 2 To max + 5        
+
         'Схлопывание
         If Cells(i, 1) <> "" And Cells(i, 1) <> "." And Cells(i, 1) = Cells(i + 1, 1) Then
            Cells(i, 3) = Cells(i, 3) + Cells(i + 1, 3)

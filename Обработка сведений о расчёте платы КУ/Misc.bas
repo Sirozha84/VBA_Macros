@@ -1,4 +1,27 @@
 Attribute VB_Name = "Misc"
+'Подбор адресов по лицевым счетам
+'Данные находятся на одной таблице, объединяет их только номер лс, адреса переносятся с одной в другую
+Sub AdresesByLS()
+    Const ft = 1    'Ячейка с ЛС в первая таблица
+    Const st = 25   'Ячейка с ЛС во второй таблице
+    Const atb = 6   'Количество столбцов с адресом
+    i = 2
+    Do While Cells(i, ft) <> ""
+        j = 2
+        Do While Cells(j, st) <> ""
+            If Cells(i, ft) = Cells(j, st) Then
+                For k = 1 To atb
+                    Cells(i, ft + k) = Cells(j, st + k)
+                Next
+                Exit Do
+            End If
+            j = j + 1
+        Loop
+        i = i + 1
+    Loop
+    
+End Sub
+
 'Дедупликация домов
 Sub Dedupl()
     Application.ScreenUpdating = False

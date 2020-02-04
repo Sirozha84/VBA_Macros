@@ -8,6 +8,7 @@ Attribute VB_Name = "SearchDifference"
 'Версия 1.7 (10.01.2020) - Вычисление разницы
 'Версия 1.8 (17.01.2020) - Правка итоговой таблицы
 'Версия 1.9 (27.01.2020) - Подготовка таблиц и создание результирующей таблицы программно
+'Версия 1.10 (04.02.2020) - Исправлен счётчик совпавших
 
 Const firstTab = "Access"   'Первая таблица
 Const secondTab = "УФА"     'Вторая таблица
@@ -189,14 +190,12 @@ Private Sub AddDead()
                 Sheets(resultTab).Cells(j, 3).Interior.Color = RGB(128, 255, 128)
                 Sheets(resultTab).Cells(j, 5).Interior.Color = RGB(128, 255, 128)
                 Sheets(resultTab).Cells(j, 6).Interior.Color = RGB(196, 255, 196)
-                mached = mached + 1
                 Sheets(resultTab).Cells(j, fCom) = "Совпал"
             End If
             If Abs(rz) > 0 Then
                 Sheets(resultTab).Cells(j, 3).Interior.Color = RGB(255, 255, 128)
                 Sheets(resultTab).Cells(j, 5).Interior.Color = RGB(255, 255, 128)
                 Sheets(resultTab).Cells(j, 6).Interior.Color = RGB(255, 255, 196)
-                mached = mached + 1
                 Sheets(resultTab).Cells(j, fCom) = "Совпал (почти)"
             End If
             If Abs(rz) > 10 Then
@@ -206,6 +205,7 @@ Private Sub AddDead()
                 changed = changed + 1
                 Sheets(resultTab).Cells(j, fCom) = "Изменён"
             End If
+            If Abs(rz) < 10 Then mached = mached + 1
             sumDif = sumDif + rz
         Else
             'А если не нашли, копируем

@@ -9,6 +9,7 @@ Attribute VB_Name = "SearchDifference"
 'Версия 1.8 (17.01.2020) - Правка итоговой таблицы
 'Версия 1.9 (27.01.2020) - Подготовка таблиц и создание результирующей таблицы программно
 'Версия 1.10 (04.02.2020) - Исправлен счётчик совпавших
+'Версия 1.11 (07.02.2020) - Убирание лишних пробелов
 
 Const firstTab = "Access"   'Первая таблица
 Const secondTab = "УФА"     'Вторая таблица
@@ -100,6 +101,11 @@ Sub PrepareTabFromAccess(shit As String)
             Loop
             Cells(i, 1) = s
         End If
+        
+        'Убирание лишних пробелов
+        Do While Right(Cells(i, 1), 1) = " "
+            Cells(i, 1) = Left(Cells(i, 1), Len(Cells(i, 1)) - 1)
+        Loop
         
         'Убирание "рублей"
         s = Replace(Cells(i, 3), "р.", "")

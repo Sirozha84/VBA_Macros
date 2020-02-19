@@ -19,15 +19,25 @@ Private Type adrIndex
     iEnd As Long
 End Type
 
-Sub Start()
+Sub Start1()
 
-max = 192617
-tabs = 24 '17-24
+    DataCollection
+    AdressMatching
+    
+    'После этого делаем сортировку по лицевому счёту и переходим в Start2
+    
+    Message "Готово!"
+    
+End Sub
 
-    'DataCollection
-    'AdressMatching
-    'Тут бы перед фильтрацией сделать сортировку по лицевому счёту
-    'А пока это требуется делать вручную!
+Sub Start2()
+
+    'Из вкладки Temp берём максимум
+    max = 192617
+
+    'И количество столбцов
+    tabs = 24
+
     Filter
     
     Message "Готово!"

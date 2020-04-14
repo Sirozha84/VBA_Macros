@@ -90,7 +90,9 @@ Sub Uslugi2()
                 Cells(i - 1, Money + 3) = Cells(i, ALlMoney)
                 Cells(i - 1, Volumes + 3) = Cells(i, Volumes + 3)
             End If
-            
+            'Выпадающие
+            Cells(i - 1, 11) = Cells(i - 1, 11) + Cells(i, 11)
+            'Удаление строки
             Rows(i).EntireRow.Delete
             i = i - 1
             Max = Max - 1

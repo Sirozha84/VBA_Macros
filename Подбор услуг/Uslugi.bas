@@ -38,7 +38,7 @@ Sub Uslugi2()
 
     ALlMoney = 12 'Колонка со всеми деньгами
     Money = 13    'Первая колонка с деньгами
-    Volumes = 17  'Первая колонка с объёмами
+    Volumes = 18  'Первая колонка с объёмами
     
     Message "Начало..."
     Max = 3938
@@ -49,49 +49,55 @@ Sub Uslugi2()
         If sh > 100 Then sh = 0: Call ProgressBar("Обработка", i, Max)
         
         'Раздвигашки выставленного
-        
-        'ТН-ТЭ
+        'ВО
         If Cells(i, Volumes) <> "" Then Cells(i, Money) = Cells(i, ALlMoney)
+        'ТН-ТЭ
+        If Cells(i, Volumes + 1) <> "" Then Cells(i, Money + 1) = Cells(i, ALlMoney)
         'Отопление
-        If Cells(i, Volumes + 2) <> "" Then Cells(i, Money + 2) = Cells(i, ALlMoney)
-        'ХВС
         If Cells(i, Volumes + 3) <> "" Then Cells(i, Money + 3) = Cells(i, ALlMoney)
+        'ХВС
+        If Cells(i, Volumes + 4) <> "" Then Cells(i, Money + 4) = Cells(i, ALlMoney)
         
         If last = Cells(i, 1) Then
             
             'Схлопывашки
             
-            'ТН-ТЭ
+            'Выпадающие
+            Cells(i - 1, 11) = Cells(i - 1, 11) + Cells(i, 11)
+            'ВО
             If Cells(i, Volumes) <> "" Then
-                If Cells(i - 1, Volumes) = "" Then
+                Cells(i - 1, Money) = Cells(i, ALlMoney)
+                Cells(i - 1, Volumes) = Cells(i, Volumes)
+            End If
+            'ТН-ТЭ
+            If Cells(i, Volumes + 1) <> "" Then
+                If Cells(i - 1, Volumes + 1) = "" Then
                     'сверху пусто, делаем как обычно
-                    Cells(i - 1, Money) = Cells(i, ALlMoney)
-                    Cells(i - 1, Volumes) = Cells(i, Volumes)
+                    Cells(i - 1, Money + 1) = Cells(i, ALlMoney)
+                    Cells(i - 1, Volumes + 1) = Cells(i, Volumes + 1)
                 Else
                     'Сверху не пусто...
-                    If Cells(i - 1, Volumes) > Cells(i, Volumes) Then
-                        Cells(i - 1, Money + 1) = Cells(i, ALlMoney)
-                        Cells(i - 1, Volumes + 1) = Cells(i, Volumes)
+                    If Cells(i - 1, Volumes + 1) > Cells(i, Volumes + 1) Then
+                        Cells(i - 1, Money + 2) = Cells(i, ALlMoney)
+                        Cells(i - 1, Volumes + 2) = Cells(i, Volumes + 1)
                     Else
-                    
-                        Cells(i - 1, Money) = Cells(i, ALlMoney)
-                        Cells(i - 1, Volumes + 1) = Cells(i - 1, Volumes)
-                        Cells(i - 1, Volumes) = Cells(i, Volumes)
+                        Cells(i - 1, Money + 2) = Cells(i, ALlMoney)
+                        Cells(i - 1, Volumes + 2) = Cells(i - 1, Volumes + 1)
+                        Cells(i - 1, Volumes + 1) = Cells(i, Volumes + 1)
                     End If
                 End If
             End If
             'Отопление
-            If Cells(i, Volumes + 2) <> "" Then
-                Cells(i - 1, Money + 2) = Cells(i, ALlMoney)
-                Cells(i - 1, Volumes + 2) = Cells(i, Volumes + 2)
-            End If
-            'ХВС
             If Cells(i, Volumes + 3) <> "" Then
                 Cells(i - 1, Money + 3) = Cells(i, ALlMoney)
                 Cells(i - 1, Volumes + 3) = Cells(i, Volumes + 3)
             End If
-            'Выпадающие
-            Cells(i - 1, 11) = Cells(i - 1, 11) + Cells(i, 11)
+            'ХВС
+            If Cells(i, Volumes + 4) <> "" Then
+                Cells(i - 1, Money + 4) = Cells(i, ALlMoney)
+                Cells(i - 1, Volumes + 4) = Cells(i, Volumes + 4)
+            End If
+            
             'Удаление строки
             Rows(i).EntireRow.Delete
             i = i - 1

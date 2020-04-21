@@ -13,12 +13,15 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+Const Version = "0.2 (21.04.2020)"
+
 Private Tab1, Tab2, TabRes As String
 Private Max1, Max2, MaxRes As Long
 Private Sum() As Integer
 Private FPS As Integer
 
 Private Sub UserForm_Activate()
+    LabelVersion = "¬ерси€: " + Version
     TextBoxTab1 = Sheets(1).name
     TextBoxTab2 = Sheets(2).name
 End Sub
@@ -105,32 +108,10 @@ Private Sub Search()
         '    End If
         'Next
         
-        'first = Misc.Search(TabRes, Sheets(Tab2).Cells(ii, 1), Head + 1, Max1)
-        'Ѕинарный поиск (сделать опцию и предупреждать что хорошо работает только в отсортированном варианте
-        first = Head + 1
-        last = Max1
-        Do
-            middle = first + Int((last - first) / 2)
-            If Sheets(Tab2).Cells(ii, 1) = Sheets(TabRes).Cells(first, 1) Then Find = True
-            If Sheets(Tab2).Cells(ii, 1) = Sheets(TabRes).Cells(middle, 1) Then Find = True
-            If Sheets(Tab2).Cells(ii, 1) = Sheets(TabRes).Cells(last, 1) Then Find = True
-            If StrComp(Sheets(Tab2).Cells(ii, 1), Sheets(TabRes).Cells(middle, 1), vbTextCompare) < 0 Then last = middle
-            If StrComp(Sheets(Tab2).Cells(ii, 1), Sheets(TabRes).Cells(middle, 1), vbTextCompare) > 0 Then first = middle
-        Loop Until Find Or last - first <= 2
-        
-        'ѕоиск в первоначальном диапазоне не помог, ищем в новых значени€х
-        If Not Find Then
-            first = Max1 + 1
-            last = MaxRes
-            Do
-                middle = first + Int((last - first) / 2)
-                If Sheets(Tab2).Cells(ii, 1) = Sheets(TabRes).Cells(first, 1) Then Find = True
-                If Sheets(Tab2).Cells(ii, 1) = Sheets(TabRes).Cells(middle, 1) Then Find = True
-                If Sheets(Tab2).Cells(ii, 1) = Sheets(TabRes).Cells(last, 1) Then Find = True
-                If StrComp(Sheets(Tab2).Cells(ii, 1), Sheets(TabRes).Cells(middle, 1), vbTextCompare) < 0 Then last = middle
-                If StrComp(Sheets(Tab2).Cells(ii, 1), Sheets(TabRes).Cells(middle, 1), vbTextCompare) > 0 Then first = middle
-            Loop Until Find Or last - first <= 2
-        End If
+        'ѕоиск в первоначальном диапазоне
+        Find = Misc.Search(TabRes, Sheets(Tab2).Cells(ii, 1), Head + 1, Max1)
+        'и если там ничего не нашлось - ищем в новых значени€х
+        If Not Find Then Find = Misc.Search(TabRes, Sheets(Tab2).Cells(ii, 1), Max1, MaxRes)
         
         If Find Then
             'Ќайдена строка в обоих таблицах

@@ -37,7 +37,7 @@ Function FindMax(ByVal name As String) As Long
 End Function
 
 'Расчёт прогресса (сколько из скольки + процент)
-Function Progress(ByVal cur As Integer, ByVal all As Integer)
+Function Progress(ByVal cur As Long, ByVal all As Long)
     Progress = text + ":" + str(cur) + " из" + str(all) + " (" + str(Int(cur / all * 100)) + "% )"
 End Function
 
@@ -46,11 +46,11 @@ Function Search(ByVal name As String, ByVal str As String, ByVal first As Long, 
     Find = False
     Do
         middle = first + Int((last - first) / 2)
-        If Sheets(Tab2).Cells(ii, 1) = Sheets(TabRes).Cells(first, 1) Then Find = True
-        If Sheets(Tab2).Cells(ii, 1) = Sheets(TabRes).Cells(middle, 1) Then Find = True
-        If Sheets(Tab2).Cells(ii, 1) = Sheets(TabRes).Cells(last, 1) Then Find = True
-        If StrComp(Sheets(Tab2).Cells(ii, 1), Sheets(TabRes).Cells(middle, 1), vbTextCompare) < 0 Then last = middle
-        If StrComp(Sheets(Tab2).Cells(ii, 1), Sheets(TabRes).Cells(middle, 1), vbTextCompare) > 0 Then first = middle
-    Loop Until Find Or last - first <= 2
+        If StrComp(str, Sheets(name).Cells(first, 1), vbTextCompare) = 0 Then Find = True
+        If StrComp(str, Sheets(name).Cells(last, 1), vbTextCompare) = 0 Then Find = True
+        If StrComp(str, Sheets(name).Cells(middle, 1), vbTextCompare) = 0 Then Find = True
+        If StrComp(str, Sheets(name).Cells(middle, 1), vbTextCompare) < 0 Then last = middle
+        If StrComp(str, Sheets(name).Cells(middle, 1), vbTextCompare) > 0 Then first = middle
+    Loop Until Find Or last - first < 2
     Search = Find
 End Function

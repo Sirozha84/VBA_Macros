@@ -1,4 +1,6 @@
 Attribute VB_Name = "Misc"
+Private SearchMethod As Byte
+
 'Создание результирующей таблицы
 Sub NewTab(name As String, create As Boolean)
     If create Then
@@ -41,16 +43,43 @@ Function Progress(ByVal cur As Long, ByVal all As Long)
     Progress = text + ":" + str(cur) + " из" + str(all) + " (" + str(Int(cur / all * 100)) + "% )"
 End Function
 
-'Бинарный поиск
-Function Search(ByVal name As String, ByVal str As String, ByVal first As Long, ByVal last As Long)
-    Find = False
-    Do
-        middle = first + Int((last - first) / 2)
-        If StrComp(str, Sheets(name).Cells(first, 1), vbTextCompare) = 0 Then Find = True
-        If StrComp(str, Sheets(name).Cells(last, 1), vbTextCompare) = 0 Then Find = True
-        If StrComp(str, Sheets(name).Cells(middle, 1), vbTextCompare) = 0 Then Find = True
-        If StrComp(str, Sheets(name).Cells(middle, 1), vbTextCompare) < 0 Then last = middle
-        If StrComp(str, Sheets(name).Cells(middle, 1), vbTextCompare) > 0 Then first = middle
-    Loop Until Find Or last - first < 2
+'Выбор метода поиска (проверка на сортировку, если сортировано - бинарный, если нет - перебор
+Sub MethodSelect(ByVal name As String, ByVal first As Long, ByVal last As Long)
+    For i = first To last - 1
+        If StrComp(Sheets(name).Cells(i, 1), Sheets(name).Cells(i + 1, 1), vbTextCompare) > 0 Then
+            SearchMethod = 1
+            Exit For
+        End If
+    Next
+End Sub
+
+'Поиск значения в таблице
+Function Search(ByVal name As String, ByVal str As String, ByVal first As Long, ByVal last As Long) As Long
+    
+    If SearchMethod = 0 Then
+        
+        'Бинарный поиск
+        Find = 0
+        Do
+            middle = first + Int((last - first) / 2)
+            If StrComp(str, Sheets(name).Cells(first, 1), vbTextCompare) = 0 Then Find = first
+            If StrComp(str, Sheets(name).Cells(last, 1), vbTextCompare) = 0 Then Find = last
+            If StrComp(str, Sheets(name).Cells(middle, 1), vbTextCompare) = 0 Then Find = middle
+            If StrComp(str, Sheets(name).Cells(middle, 1), vbTextCompare) < 0 Then last = middle
+            If StrComp(str, Sheets(name).Cells(middle, 1), vbTextCompare) > 0 Then first = middle
+        Loop Until Find > 0 Or last - first < 2
+    
+    Else
+        
+        'Поиск перебором
+        For i = first To last
+            If str = Sheets(name).Cells(i, 1) Then
+                Find = i
+                Exit For
+            End If
+        Next
+    
+    End If
     Search = Find
+
 End Function

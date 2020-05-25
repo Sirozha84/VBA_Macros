@@ -13,7 +13,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-Const Version = "0.3 (22.04.2020)"
+Const Version = "0.4 (25.05.2020)"
 
 Private Tab1, Tab2, TabRes As String
 Private Max1, Max2, MaxRes As Long
@@ -36,14 +36,41 @@ Private Sub CommandButtonRun_Click()
     CommandButtonRun.Enabled = False
     Application.ScreenUpdating = False
     
-    'ѕока хардкодим это, потом надо будет сделать читку с формы
-    ReDim ACop(0)
-    ACop(0) = 2
-    ReDim ASum(0)
-    ASum(0) = 3
-    ReDim ACom(0)
-    ACom(0) = 4
+    '«аполн€ем список колонок дл€ копировани€
+    strar = Split(TextBoxCopy, ",")
+    с = UBound(strar)
+    If с >= 0 Then
+        ReDim ACop(с)
+        For i = 0 To с
+            ACop(i) = strar(i)
+        Next
+    Else
+        ReDim ACop(0)
+    End If
     
+    '«аполн€ем список колонок дл€ суммировани€
+    strar = Split(TextBoxSumm, ",")
+    с = UBound(strar)
+    If с >= 0 Then
+        ReDim ASum(с)
+        For i = 0 To с
+            ASum(i) = strar(i)
+        Next
+    Else
+        ReDim ASum(0)
+    End If
+    
+    '«аполн€ем список колонок дл€ сравнени€
+    strar = Split(TextBoxCompare, ",")
+    с = UBound(strar)
+    If с >= 0 Then
+        ReDim ACom(с)
+        For i = 0 To с
+            ACom(i) = strar(i)
+        Next
+    Else
+        ReDim ACom(0)
+    End If
     'On Error GoTo Error
     
     FPS = 100 ' MaxRes / 1000

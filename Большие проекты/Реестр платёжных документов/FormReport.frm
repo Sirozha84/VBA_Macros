@@ -16,7 +16,7 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 'Загрузка программы
 Private Sub UserForm_Activate()
-    LabelVersion = "Версия: 0.2 (02.07.2020)"
+    LabelVersion = "Версия: 1.0 (03.07.2020)"
     TextBoxHeat = Sheets(1).name
     TextBoxHW = Sheets(2).name
 End Sub
@@ -105,7 +105,7 @@ Private Sub ButtonOK_Click()
     Call Misc.NewTab(tabRes, True)
     Sheets(tabRes).Select
     
-    'Устанавливаем ширину колонок
+    'Устанавливаем ширину колонок и форматы
     Columns(1).ColumnWidth = 5.86
     Columns(2).ColumnWidth = 46.71
     Columns(3).ColumnWidth = 18
@@ -115,8 +115,12 @@ Private Sub ButtonOK_Click()
     Columns(7).ColumnWidth = 16.71
     Columns(8).ColumnWidth = 13.28
     Columns(9).ColumnWidth = 13.29
-    
-    'Шапка
+    Columns(4).NumberFormat = "### ### ##0.00"
+    Columns(6).NumberFormat = "### ### ##0.00"
+    Columns(7).NumberFormat = "### ### ##0.00"
+    Columns(8).NumberFormat = "### ### ##0.00"
+ 
+    'Заголовок
     Rows(1).RowHeight = 56.25
     Call MergeAndCenter(1, 1, 1, 9, "Реестр платежных документов для внесения платы за коммунальные услуги, " + _
         "предъявленной собственникам и пользователям помещений в многоквартирных домах или жилых домах, " + _
@@ -124,32 +128,32 @@ Private Sub ButtonOK_Click()
         "водоснабжение, и теплоснабжающими организациями, поставляющими тепловую энергию, вырабатываемую " + _
         "электрокотельными (электробойлерными) или котельными, работающими на мазутном топливе " + _
         "(далее – ресурсоснабжающие организации)")
-    Call MergeAndCenter(2, 1, 1, 9, Cells(2, 1) = "за " + Mnth + " года")
-    Call MergeAndCenter(3, 1, 1, 9, Cells(3, 1) = "(наименование месяца)")
+    Call MergeAndCenter(2, 1, 1, 9, "за " + Mnth + " года")
+    Call MergeAndCenter(3, 1, 1, 9, "(наименование месяца)")
     Call MergeAndCenter(4, 1, 1, 9, "ООО ""КРАСЭКО-ЭЛЕКТРО""")
     Call MergeAndCenter(5, 1, 1, 9, "(наименование ресурсоснабжающей организации)")
-    Call MergeAndCenter(7, 1, 3, 1, "№ п/п")
-    Call MergeAndCenter(7, 2, 3, 1, "Адрес многоквартирного или  жилого дома")
-    Call MergeAndCenter(7, 3, 3, 1, "Наименование коммунального ресурса (тепловая энергия, горячая вода)")
-    Call MergeAndCenter(7, 4, 3, 1, "Объем потребления коммунального ресурса по платежным документам")
-    Call MergeAndCenter(7, 5, 3, 1, "Количество  платежных документов для внесения платы за  коммунальные услуги (платежные документы)")
-    Call MergeAndCenter(7, 6, 1, 3, "Сумма по платежным документам")
-    Call MergeAndCenter(8, 6, 1, 3, "(тыс. рублей)")
-    Call MergeAndCenter(9, 6, 1, 1, "за отопление")
-    Call MergeAndCenter(9, 7, 1, 1, "за компонент «тепловая энергия» при оказании услуги по горячему водоснабжению")
-    Call MergeAndCenter(9, 8, 1, 1, "итого")
-    Call MergeAndCenter(7, 9, 3, 1, "Период, за который предъявлены платежные документы")
     
+    'Шапка
+    Call MergeAndCenter(7, 1, 2, 1, "№ п/п")
+    Call MergeAndCenter(7, 2, 2, 1, "Адрес многоквартирного или  жилого дома")
+    Call MergeAndCenter(7, 3, 2, 1, "Наименование коммунального ресурса (тепловая энергия, горячая вода)")
+    Call MergeAndCenter(7, 4, 2, 1, "Объем потребления коммунального ресурса по платежным документам")
+    Call MergeAndCenter(7, 5, 2, 1, "Количество  платежных документов для внесения платы за  коммунальные услуги (платежные документы)")
+    Call MergeAndCenter(7, 6, 1, 3, "Сумма по платежным документам" + Chr(10) + "(тыс. рублей)")
+    Rows(8).RowHeight = 90
+    Call MergeAndCenter(8, 6, 1, 1, "за отопление")
+    Call MergeAndCenter(8, 7, 1, 1, "за компонент «тепловая энергия» при оказании услуги по горячему водоснабжению")
+    Call MergeAndCenter(8, 8, 1, 1, "итого")
+    Call MergeAndCenter(7, 9, 2, 1, "Период, за который предъявлены платежные документы")
     For i = 1 To 9
-        Cells(10, i) = i
-        Cells(10, i).HorizontalAlignment = xlCenter
+        Cells(9, i) = i
+        Cells(9, i).HorizontalAlignment = xlCenter
     Next
-    
-    'Формируем отчёт
+    Range(Cells(7, 1), Cells(9, 9)).Borders.Weight = 3
     
     'Выводим таблицы
     Dim s As Integer
-    s = 11
+    s = 10
     allVolumeHeat = 0
     allVolumeHW = 0
     allDocsHeat = 0
@@ -166,13 +170,14 @@ Private Sub ButtonOK_Click()
         sumPriceHW = 0
         
         'Шапка
-        Call MergeAndCenter(s, 1, 1, 1, t)
+        Call MergeAndCenter(s, 1, 1, 1, CStr(t))
         If t = 1 Then
             Cells(s, 2) = "Многоквартирные дома"
         Else
             Cells(s, 2) = "Жилые дома"
         End If
         Sheets(tabRes).Range(Cells(s, 2), Cells(s, 9)).Merge
+        Range(Cells(s, 1), Cells(s, 9)).Borders.Weight = 3
         s = s + 1
         
         For i = 1 To Max
@@ -181,7 +186,7 @@ Private Sub ButtonOK_Click()
                 (records(i).VolumeHeat <> 0 Or records(i).VolumeHW <> 0) Then
                 
                 'тепловая энергия
-                Call MergeAndCenter(s, 3, 1, 1, "'" + CStr(t) + "." + CStr(num))
+                Call MergeAndCenter(s, 1, 3, 1, "'" + CStr(t) + "." + CStr(num))
                 Cells(s, 2) = records(i).Adress
                 Cells(s, 3) = "тепловая энергия"
                 Cells(s, 4) = records(i).VolumeHeat
@@ -191,6 +196,7 @@ Private Sub ButtonOK_Click()
                 Cells(s, 9) = Mnth
                 VolumeSum = records(i).VolumeHeat
                 PriceSum = records(i).PriceHeat
+                Range(Cells(s, 1), Cells(s, 9)).Borders.Weight = 2
                 s = s + 1
                 
                 'горячая вода
@@ -203,6 +209,7 @@ Private Sub ButtonOK_Click()
                 Cells(s, 9) = Mnth
                 VolumeSum = VolumeSum + records(i).VolumeHW
                 PriceSum = PriceSum + records(i).PriceHW
+                Range(Cells(s, 1), Cells(s, 9)).Borders.Weight = 2
                 s = s + 1
                 
                 'итого
@@ -212,6 +219,9 @@ Private Sub ButtonOK_Click()
                 Cells(s, 8) = Round(PriceSum / 1000, 3)
                 Cells(s, 9) = Mnth
                 Range(Cells(s, 2), Cells(s, 9)).Interior.Color = RGB(221, 235, 247)
+                Range(Cells(s, 1), Cells(s, 9)).Borders.Weight = 2
+                Range(Cells(s - 2, 1), Cells(s, 1)).Borders.Weight = 3
+                Range(Cells(s - 2, 9), Cells(s, 9)).Borders(xlEdgeRight).Weight = 3
                 s = s + 1
                 
                 'Счётчики
@@ -241,6 +251,7 @@ Private Sub ButtonOK_Click()
         Cells(s, 5) = sumDocsHeat
         Cells(s, 6) = Round(sumPriceHeat / 1000, 3)
         Cells(s, 8) = Round(sumPriceHeat / 1000, 3)
+        Range(Cells(s, 1), Cells(s, 9)).Borders.Weight = 2
         s = s + 1
         
         'горячая вода
@@ -249,12 +260,19 @@ Private Sub ButtonOK_Click()
         Cells(s, 5) = sumDocsHW
         Cells(s, 7) = Round(sumPriceHW / 1000, 3)
         Cells(s, 8) = Round(sumPriceHW / 1000, 3)
+        Range(Cells(s, 1), Cells(s, 9)).Borders.Weight = 2
         s = s + 1
         
         'итого
         Cells(s, 3) = "итого"
         Cells(s, 4) = sumVolumeHeat + sumVolumeHW
         Cells(s, 8) = Round((sumPriceHeat + sumPriceHW) / 1000, 3)
+        Range(Cells(s - 2, 1), Cells(s, 1)).Merge
+        Range(Cells(s, 1), Cells(s, 9)).Borders.Weight = 2
+        Range(Cells(s - 2, 1), Cells(s, 1)).Borders.Weight = 3
+        Range(Cells(s - 2, 2), Cells(s, 2)).Borders.Weight = 3
+        Range(Cells(s - 2, 3), Cells(s - 2, 9)).Borders(xlEdgeTop).Weight = 3
+        Range(Cells(s - 2, 9), Cells(s, 9)).Borders(xlEdgeRight).Weight = 3
         s = s + 1
         
         'Счётчики
@@ -277,6 +295,7 @@ Private Sub ButtonOK_Click()
     Cells(s, 5) = allDocsHeat
     Cells(s, 6) = Round(allPriceHeat / 1000, 3)
     Cells(s, 8) = Round(allPriceHeat / 1000, 3)
+    Range(Cells(s, 1), Cells(s, 9)).Borders.Weight = 2
     s = s + 1
     
     'горячая вода
@@ -285,13 +304,43 @@ Private Sub ButtonOK_Click()
     Cells(s, 5) = allDocsHW
     Cells(s, 7) = Round(allPriceHW / 1000, 3)
     Cells(s, 8) = Round(allPriceHW / 1000, 3)
+    Range(Cells(s, 1), Cells(s, 9)).Borders.Weight = 2
     s = s + 1
     
     'итого
     Cells(s, 3) = "итого"
     Cells(s, 4) = allVolumeHeat + allVolumeHW
     Cells(s, 8) = Round((allPriceHeat + allPriceHW) / 1000, 3)
+    Range(Cells(s, 1), Cells(s, 9)).Borders.Weight = 2
+    Range(Cells(s - 2, 1), Cells(s, 2)).Borders.Weight = 3
+    Range(Cells(s - 2, 3), Cells(s - 2, 9)).Borders(xlEdgeTop).Weight = 3
+    Range(Cells(s - 2, 9), Cells(s, 9)).Borders(xlEdgeRight).Weight = 3
+    Range(Cells(s, 3), Cells(s, 9)).Borders(xlEdgeBottom).Weight = 3
+    
+    s = s + 4
+    
+    'Подписи
+    Cells(s, 1) = "Исполнительный директор"
+    Cells(s, 8) = "И.П. Михайленко"
+    Cells(s, 8).HorizontalAlignment = xlCenter
     s = s + 1
+    Call MergeAndCenter(s, 4, 1, 2, "(подпись)")
+    Range(Cells(s, 4), Cells(s, 5)).Borders(xlEdgeTop).LineStyle = True
+    Cells(s, 8) = "(ФИО)"
+    Cells(s, 8).HorizontalAlignment = xlCenter
+    Cells(s, 8).Borders(xlEdgeTop).LineStyle = True
+    s = s + 1
+    Cells(s, 3) = "М. П."
+    s = s + 1
+    Cells(s, 3) = "(в случае наличия)"
+    s = s + 3
+    Cells(s, 1) = "Дорошенко Н.Н. (3919)757719"
+    
+    'Эксперименты
+    's = s + 3
+    'Range(Cells(s, 3), Cells(s + 1, 4)).Borders.LineStyle = True
+    's = s + 3
+    'Range(Cells(s, 3), Cells(s + 1, 4)).Borders(.Weight = 3
     
     
     Call Misc.Message("Готово!")

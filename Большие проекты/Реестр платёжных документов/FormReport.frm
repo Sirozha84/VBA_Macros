@@ -16,7 +16,7 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 'Загрузка программы
 Private Sub UserForm_Activate()
-    LabelVersion = "Версия: 1.0 (03.07.2020)"
+    LabelVersion = "Версия: 2.0 (06.07.2020)"
     TextBoxHeat = Sheets(1).name
     TextBoxHW = Sheets(2).name
 End Sub
@@ -48,6 +48,9 @@ End Sub
 Private Sub ButtonOK_Click()
     ReDim records(0) As Record
     Dim tabRes As String
+    Dim tabHeat As String
+    Dim tabHW As String
+    Dim i As Long
     tabHeat = TextBoxHeat
     tabHW = TextBoxHW
     tabRes = TextBoxReport
@@ -57,14 +60,37 @@ Private Sub ButtonOK_Click()
     'Добавление данных "Тепловая энергия"
     Call Misc.Message("Добавление данных из ""Тепловая энергия""...")
     i = 2
-    Do While Sheets(tabHeat).Cells(i, 1) <> ""
-        Max = Max + 1
-        ReDim Preserve records(Max) As Record
-        records(Max).Adress = Sheets(tabHeat).Cells(i, 1)
-        records(Max).PPHeat = Sheets(tabHeat).Cells(i, 2)
-        records(Max).VolumeHeat = Sheets(tabHeat).Cells(i, 3)
-        records(Max).PriceHeat = Sheets(tabHeat).Cells(i, 4)
-        records(Max).tag = Sheets(tabHeat).Cells(i, 5)
+    lastad = MakeAdress(tabHeat, i)
+    pp = 0
+    volume = 0
+    Price = 0
+    tag = ""
+    Do
+        ad = MakeAdress(tabHeat, i)
+        'Текущая запись отличается от предыдущей или вовсе отсутствует
+        If ad <> lastad Or Sheets(tabHeat).Cells(i, 1) = "" Then
+            Max = Max + 1
+            ReDim Preserve records(Max) As Record
+            records(Max).Adress = lastad
+            records(Max).PPHeat = pp
+            records(Max).VolumeHeat = volume
+            records(Max).PriceHeat = Price
+            records(Max).tag = tag
+            'Сбрасываем счётчики
+            pp = 0
+            volume = 0
+            Price = 0
+            lastad = ad
+        End If
+        'Адрес как в предыдущей строке, "схлапываем" данные
+        If ad = lastad Then
+            pp = pp + 1
+            volume = volume + Sheets(tabHeat).Cells(i, 8)
+            Price = Price + Sheets(tabHeat).Cells(i, 9)
+            tag = Sheets(tabHeat).Cells(i, 11)
+        End If
+        If Sheets(tabHeat).Cells(i, 1) = "" Then Exit Do
+        lastad = ad
         i = i + 1
     Loop
     MaxG = Max
@@ -72,31 +98,53 @@ Private Sub ButtonOK_Click()
     'Добавление данных "Горячая вода"
     Call Misc.Message("Добавление данных из ""Горячая вода""...")
     i = 2
-    Do While Sheets(tabHW).Cells(i, 1) <> ""
-        'Проверяем, нет ли ли такой записи, взятой из "Тепловой энергии"
-        Find = 0
-        For j = 1 To MaxG
-            If Sheets(tabHW).Cells(i, 1) = records(j).Adress Then
-                Find = j
-                Exit For
+    lastad = MakeAdress(tabHW, i)
+    pp = 0
+    volume = 0
+    Price = 0
+    tag = ""
+    Do
+        ad = MakeAdress(tabHW, i)
+        'Текущая запись отличается от предыдущей или вовсе отсутствует
+        If ad <> lastad Or Sheets(tabHW).Cells(i, 1) = "" Then
+            'Данные схлопнули, ищем теперь что получилось в "Тепловой энергии"
+            Find = 0
+            For j = 1 To MaxG
+                If StrComp(lastad, records(j).Adress, 1) = 1 Then
+                    Find = j
+                    Exit For
+                End If
+            Next
+            If Find > 0 Then
+                'Запись есть, дополняем её
+                records(Find).PPHW = pp
+                records(Find).VolumeHW = volume
+                records(Find).PriceHW = Price
+            Else
+                'Если такой записи ещё нет, добавляем новую
+                Max = Max + 1
+                ReDim Preserve records(Max) As Record
+                records(Max).Adress = lastad
+                records(Max).PPHW = pp
+                records(Max).VolumeHW = volume
+                records(Max).PriceHW = Price
+                records(Max).tag = tag
             End If
-        Next
-        If Find > 0 Then
-            'Запись есть, дополняем её
-            records(Find).PPHW = Sheets(tabHW).Cells(i, 2)
-            records(Find).VolumeHW = Sheets(tabHW).Cells(i, 3)
-            records(Find).PriceHW = Sheets(tabHW).Cells(i, 4)
-        Else
-            'Если такой записи ещё нет, добавляем новую
-            Max = Max + 1
-            ReDim Preserve records(Max) As Record
-            records(Max).Adress = Sheets(tabHW).Cells(i, 1)
-            records(Max).PPHW = Sheets(tabHW).Cells(i, 2)
-            records(Max).VolumeHW = Sheets(tabHW).Cells(i, 3)
-            records(Max).PriceHW = Sheets(tabHW).Cells(i, 4)
-            records(Max).tag = Sheets(tabHW).Cells(i, 5)
+            'Сбрасываем счётчики
+            pp = 0
+            volume = 0
+            Price = 0
+            lastad = ad
         End If
-        
+        'Адрес как в предыдущей строке, "схлапываем" данные
+        If ad = lastad Then
+            pp = pp + 1
+            volume = volume + Sheets(tabHW).Cells(i, 8)
+            Price = Price + Sheets(tabHW).Cells(i, 9)
+            tag = Sheets(tabHW).Cells(i, 11)
+        End If
+        If Sheets(tabHW).Cells(i, 1) = "" Then Exit Do
+        lastad = ad
         i = i + 1
     Loop
     
@@ -354,3 +402,13 @@ Sub MergeAndCenter(R As Integer, C As Integer, height As Integer, width As Integ
     Cells(R, C).WrapText = True
     Cells(R, C) = text
 End Sub
+
+Function MakeAdress(sheet As String, i As Long) As String
+    MakeAdress = Sheets(sheet).Cells(i, 1) + ", " + _
+                 Sheets(sheet).Cells(i, 2) + ", " + _
+                 CStr(Sheets(sheet).Cells(i, 3)) + _
+                 Sheets(sheet).Cells(i, 4)
+    If Sheets(sheet).Cells(i, 4) <> "" Then
+        MakeAdress = MakeAdress + ", Корпус" + CStr(Sheets(sheet).Cells(i, 5))
+    End If
+End Function

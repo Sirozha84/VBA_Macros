@@ -11,6 +11,7 @@ Attribute VB_Name = "CalcCompare"
 'Версия 1.10 (04.02.2020) - Исправлен счётчик совпавших
 'Версия 1.11 (07.02.2020) - Убирание лишних пробелов
 'Версия 2.0 (21.07.2020) - Упрощение код после форка, теперь решаем только одну задачу
+'Версия 2.1 (22.07.2020) - Исправлен небольшой "упс" с именем таблицы и сделан трим номеров (внезапно появились пробелы)
 
 Const fCom = 7              'Поле для комментария
 Global Tab1C As String      'Первая таблица
@@ -21,7 +22,7 @@ Global max As Integer       'Счётчик строк всего
 
 Sub Start()
     
-    Tab1C = "1с"
+    Tab1C = "1c"
     
     TabAccess = "Тепло"
     TabResult = "ТеплоR"
@@ -45,7 +46,7 @@ Private Sub MakeCopy()
     Message TabAccess + ": Копирование..."
     
     If Not SheetExist(TabResult) Then
-        Sheets.Add(Sheets(Sheets.Count)).name = name
+        Sheets.Add(Sheets(Sheets.Count)).name = TabResult
     End If
     
     Sheets(TabResult).Select
@@ -92,7 +93,7 @@ Private Sub Compare()
         Find = False
         For j = 2 To max
             Find = False
-            If Cells(j, 1) = Sheets(Tab1C).Cells(i, 1) Then
+            If Trim(Cells(j, 1)) = Trim(Sheets(Tab1C).Cells(i, 1)) Then
                 Find = True
                 Exit For
             End If

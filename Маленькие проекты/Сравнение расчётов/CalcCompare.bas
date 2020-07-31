@@ -12,6 +12,7 @@ Attribute VB_Name = "CalcCompare"
 'Версия 1.11 (07.02.2020) - Убирание лишних пробелов
 'Версия 2.0 (21.07.2020) - Упрощение код после форка, теперь решаем только одну задачу
 'Версия 2.1 (22.07.2020) - Исправлен небольшой "упс" с именем таблицы и сделан трим номеров (внезапно появились пробелы)
+'Версия 2.2 (23.07.2020) - Ещё одна страница для сравнения "УК"
 
 Const fCom = 7              'Поле для комментария
 Global Tab1C As String      'Первая таблица
@@ -22,17 +23,20 @@ Global max As Integer       'Счётчик строк всего
 
 Sub Start()
     
-    Tab1C = "1c"
+    Tab1C = "TDSheet"
     
     TabAccess = "Тепло"
-    TabResult = "ТеплоR"
-
+    TabResult = "Тепло R"
     MakeCopy
     Compare
     
     TabAccess = "Вода"
-    TabResult = "ВодаR"
-
+    TabResult = "Вода R"
+    MakeCopy
+    Compare
+    
+    TabAccess = "УК"
+    TabResult = "УК R"
     MakeCopy
     Compare
     

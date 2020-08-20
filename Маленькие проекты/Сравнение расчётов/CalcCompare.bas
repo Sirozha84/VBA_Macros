@@ -13,7 +13,9 @@ Attribute VB_Name = "CalcCompare"
 'Версия 2.0 (21.07.2020) - Упрощение код после форка, теперь решаем только одну задачу
 'Версия 2.1 (22.07.2020) - Исправлен небольшой "упс" с именем таблицы и сделан трим номеров (внезапно появились пробелы)
 'Версия 2.2 (23.07.2020) - Ещё одна страница для сравнения "УК"
+'Версия 2.3 (20.08.2020) - Значение люфта вынесено как константа
 
+Const Luft = 5              'Люфт, максимальное число которого будет считатся как "почти совпало"
 Const fCom = 7              'Поле для комментария
 Global Tab1C As String      'Первая таблица
 Global TabAccess As String  'Вторая таблица
@@ -115,14 +117,14 @@ Private Sub Compare()
                 Cells(j, fCom) = "Совпал"
                 Mached = Mached + 1
             End If
-            If Abs(rz) > 0 And Abs(rz) <= 5 Then
+            If Abs(rz) > 0 And Abs(rz) <= Luft Then
                 Cells(j, 3).Interior.Color = RGB(255, 255, 196)
                 Cells(j, 5).Interior.Color = RGB(255, 255, 196)
                 Cells(j, 6).Interior.Color = RGB(255, 255, 128)
                 Cells(j, fCom) = "Почти"
                 Pochti = Pochti + 1
             End If
-            If Abs(rz) > 5 Then
+            If Abs(rz) > Luft Then
                 Cells(j, 3).Interior.Color = RGB(255, 196, 196)
                 Cells(j, 5).Interior.Color = RGB(255, 196, 196)
                 Cells(j, 6).Interior.Color = RGB(255, 128, 128)

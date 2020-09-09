@@ -14,7 +14,3 @@ End Type
 Public Sub Start()
     FormReport.Show
 End Sub
-  =   -1  'True
-End
-   -1  'True
-End

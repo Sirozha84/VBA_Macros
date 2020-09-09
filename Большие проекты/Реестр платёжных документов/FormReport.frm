@@ -16,20 +16,9 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 'Загрузка программы
 Private Sub UserForm_Activate()
-    LabelVersion = "Версия: 2.0 (06.07.2020)"
+    LabelVersion = "Версия: 2.1 (09.09.2020)"
     TextBoxHeat = Sheets(1).name
     TextBoxHW = Sheets(2).name
-End Sub
-
-'Справка по формату таблиц
-Private Sub ButtonHelp_Click()
-    MsgBox ("На обрабтку подаются две таблицы: тепловая энергия и горячая вода. Порядок колонок следующий:" + Chr(10) + _
-        "Колонка 1: Адрес" + Chr(10) + _
-        "Колонка 2: Количество платёжных документов" + Chr(10) + _
-        "Колонка 3: Объём потребления. Норматив" + Chr(10) + _
-        "Колонка 4: Начисленно по утверждённому тарифу" + Chr(10) + _
-        "Колонка 5: Признак объекта (МКД или ИЖД)" + Chr(10) + _
-        "Данные берутся со второй строки, оставляя первую под шапку.")
 End Sub
 
 'Поменять местами месяцы
@@ -64,18 +53,18 @@ Private Sub ButtonOK_Click()
     pp = 0
     volume = 0
     Price = 0
-    tag = ""
+    Tag = ""
     Do
         ad = MakeAdress(tabHeat, i)
         'Текущая запись отличается от предыдущей или вовсе отсутствует
-        If ad <> lastad Or Sheets(tabHeat).Cells(i, 1) = "" Then
+        If StrComp(ad, lastad) <> 0 Or Sheets(tabHeat).Cells(i, 1) = "" Then
             Max = Max + 1
             ReDim Preserve records(Max) As Record
             records(Max).Adress = lastad
             records(Max).PPHeat = pp
             records(Max).VolumeHeat = volume
             records(Max).PriceHeat = Price
-            records(Max).tag = tag
+            records(Max).Tag = Tag
             'Сбрасываем счётчики
             pp = 0
             volume = 0
@@ -83,11 +72,11 @@ Private Sub ButtonOK_Click()
             lastad = ad
         End If
         'Адрес как в предыдущей строке, "схлапываем" данные
-        If ad = lastad Then
+        If StrComp(ad, lastad) = 0 Then
             pp = pp + 1
             volume = volume + Sheets(tabHeat).Cells(i, 8)
             Price = Price + Sheets(tabHeat).Cells(i, 9)
-            tag = Sheets(tabHeat).Cells(i, 11)
+            Tag = Sheets(tabHeat).Cells(i, 11)
         End If
         If Sheets(tabHeat).Cells(i, 1) = "" Then Exit Do
         lastad = ad
@@ -102,21 +91,25 @@ Private Sub ButtonOK_Click()
     pp = 0
     volume = 0
     Price = 0
-    tag = ""
+    Tag = ""
     Do
         ad = MakeAdress(tabHW, i)
         'Текущая запись отличается от предыдущей или вовсе отсутствует
-        If ad <> lastad Or Sheets(tabHW).Cells(i, 1) = "" Then
+        If StrComp(ad, lastad, 1) <> 0 Or Sheets(tabHW).Cells(i, 1) = "" Then
             'Данные схлопнули, ищем теперь что получилось в "Тепловой энергии"
             Find = 0
             For j = 1 To MaxG
-                If StrComp(lastad, records(j).Adress, 1) = 1 Then
+                If StrComp(lastad, records(j).Adress, 1) = 0 Then
                     Find = j
                     Exit For
                 End If
             Next
             If Find > 0 Then
                 'Запись есть, дополняем её
+                If records(Find).VolumeHW <> 0 Then
+                    MsgBox "Адреса расположены не попорядку, ранее уже встрачался: " + lastad
+                    End
+                End If
                 records(Find).PPHW = pp
                 records(Find).VolumeHW = volume
                 records(Find).PriceHW = Price
@@ -128,7 +121,7 @@ Private Sub ButtonOK_Click()
                 records(Max).PPHW = pp
                 records(Max).VolumeHW = volume
                 records(Max).PriceHW = Price
-                records(Max).tag = tag
+                records(Max).Tag = Tag
             End If
             'Сбрасываем счётчики
             pp = 0
@@ -137,11 +130,11 @@ Private Sub ButtonOK_Click()
             lastad = ad
         End If
         'Адрес как в предыдущей строке, "схлапываем" данные
-        If ad = lastad Then
+        If StrComp(ad, lastad, 1) = 0 Then
             pp = pp + 1
             volume = volume + Sheets(tabHW).Cells(i, 8)
             Price = Price + Sheets(tabHW).Cells(i, 9)
-            tag = Sheets(tabHW).Cells(i, 11)
+            Tag = Sheets(tabHW).Cells(i, 11)
         End If
         If Sheets(tabHW).Cells(i, 1) = "" Then Exit Do
         lastad = ad
@@ -229,8 +222,8 @@ Private Sub ButtonOK_Click()
         s = s + 1
         
         For i = 1 To Max
-            If ((t = 1 And StrComp(records(i).tag, "мкд", 1) = 0) Or _
-                (t = 2 And StrComp(records(i).tag, "ижд", 1) = 0)) And _
+            If ((t = 1 And StrComp(records(i).Tag, "мкд", 1) = 0) Or _
+                (t = 2 And StrComp(records(i).Tag, "ижд", 1) = 0)) And _
                 (records(i).VolumeHeat <> 0 Or records(i).VolumeHW <> 0) Then
                 
                 'тепловая энергия
@@ -249,7 +242,7 @@ Private Sub ButtonOK_Click()
                 
                 'горячая вода
                 Cells(s, 2) = records(i).Adress
-                Cells(s, 3) = "горачая вода"
+                Cells(s, 3) = "горячая вода"
                 Cells(s, 4) = records(i).VolumeHW
                 Cells(s, 5) = records(i).PPHW
                 Cells(s, 7) = Round(records(i).PriceHW / 1000, 3)
@@ -384,14 +377,9 @@ Private Sub ButtonOK_Click()
     s = s + 3
     Cells(s, 1) = "Дорошенко Н.Н. (3919)757719"
     
-    'Эксперименты
-    's = s + 3
-    'Range(Cells(s, 3), Cells(s + 1, 4)).Borders.LineStyle = True
-    's = s + 3
-    'Range(Cells(s, 3), Cells(s + 1, 4)).Borders(.Weight = 3
-    
-    
     Call Misc.Message("Готово!")
+    End
+    
     Application.ScreenUpdating = True
 End Sub
 
@@ -404,6 +392,7 @@ Sub MergeAndCenter(R As Integer, C As Integer, height As Integer, width As Integ
 End Sub
 
 Function MakeAdress(sheet As String, i As Long) As String
+On Error GoTo er:
     MakeAdress = Sheets(sheet).Cells(i, 1) + ", " + _
                  Sheets(sheet).Cells(i, 2) + ", " + _
                  CStr(Sheets(sheet).Cells(i, 3)) + _
@@ -411,4 +400,8 @@ Function MakeAdress(sheet As String, i As Long) As String
     If Sheets(sheet).Cells(i, 4) <> "" Then
         MakeAdress = MakeAdress + ", Корпус" + CStr(Sheets(sheet).Cells(i, 5))
     End If
+    Exit Function
+er:
+    MsgBox "Ошибка во входных данных, проверьте правильность расположения колонок!"
+    End
 End Function

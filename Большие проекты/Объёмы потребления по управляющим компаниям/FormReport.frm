@@ -1,10 +1,10 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} FormReport 
    Caption         =   "Настройка отчёта"
-   ClientHeight    =   4680
-   ClientLeft      =   120
-   ClientTop       =   465
-   ClientWidth     =   5520
+   ClientHeight    =   4683
+   ClientLeft      =   119
+   ClientTop       =   462
+   ClientWidth     =   5523
    OleObjectBlob   =   "FormReport.frx":0000
    StartUpPosition =   1  'CenterOwner
    WhatsThisHelp   =   -1  'True
@@ -26,7 +26,7 @@ Dim curDom As String 'Адрес текущего дома для поиска
 
 'Загрузка программы
 Private Sub UserForm_Activate()
-    LabelVersion = "Версия: 1.0 (02.10.2020)"
+    LabelVersion = "Версия: 1.1 (03.10.2020)"
     On Error GoTo er
     TextBoxTN = Sheets(1).name
     TextBoxHVS = Sheets(2).name
@@ -210,13 +210,13 @@ Sub FindHome(name As String, max As Long, t As Integer)
             'Размещаем остальные данные в запись
             res(Find).kv = Sheets(name).Cells(i, cKv)
             If t = 1 Then
-                res(Find).VolumeTN1 = Sheets(name).Cells(i, v1)
-                res(Find).VolumeTN2 = Sheets(name).Cells(i, v2)
-                res(Find).VolumeTN3 = Sheets(name).Cells(i, v3)
+                res(Find).VolumeTN1 = res(Find).VolumeTN1 + Sheets(name).Cells(i, v1)
+                res(Find).VolumeTN2 = res(Find).VolumeTN2 + Sheets(name).Cells(i, v2)
+                res(Find).VolumeTN3 = res(Find).VolumeTN3 + Sheets(name).Cells(i, v3)
             Else
-                res(Find).VolumeHVS1 = Sheets(name).Cells(i, v1)
-                res(Find).VolumeHVS2 = Sheets(name).Cells(i, v2)
-                res(Find).VolumeHVS3 = Sheets(name).Cells(i, v3)
+                res(Find).VolumeHVS1 = res(Find).VolumeHVS1 + Sheets(name).Cells(i, v1)
+                res(Find).VolumeHVS2 = res(Find).VolumeHVS2 + Sheets(name).Cells(i, v2)
+                res(Find).VolumeHVS3 = res(Find).VolumeHVS3 + Sheets(name).Cells(i, v3)
             End If
         
         End If

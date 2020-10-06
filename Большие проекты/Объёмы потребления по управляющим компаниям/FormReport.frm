@@ -2,9 +2,9 @@ VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} FormReport 
    Caption         =   "Настройка отчёта"
    ClientHeight    =   4683
-   ClientLeft      =   119
-   ClientTop       =   462
-   ClientWidth     =   5523
+   ClientLeft      =   120
+   ClientTop       =   465
+   ClientWidth     =   5520
    OleObjectBlob   =   "FormReport.frx":0000
    StartUpPosition =   1  'CenterOwner
    WhatsThisHelp   =   -1  'True
@@ -26,7 +26,7 @@ Dim curDom As String 'Адрес текущего дома для поиска
 
 'Загрузка программы
 Private Sub UserForm_Activate()
-    LabelVersion = "Версия: 1.1 (03.10.2020)"
+    LabelVersion = "Версия: 1.2 (06.10.2020)"
     On Error GoTo er
     TextBoxTN = Sheets(1).name
     TextBoxHVS = Sheets(2).name
@@ -69,8 +69,8 @@ Private Sub ButtonOK_Click()
     Do While Sheets(tabA).Cells(aMax + 2, 1) <> ""
         aMax = aMax + 1
         ReDim Preserve uk(aMax) As Adress
-        uk(aMax).ul = Sheets(tabA).Cells(aMax + 1, 6) '6-7 - сделать ли константы?
-        uk(aMax).dom = Sheets(tabA).Cells(aMax + 1, 7)
+        uk(aMax).ul = Trim(Sheets(tabA).Cells(aMax + 1, 6)) '6-7 - сделать ли константы?
+        uk(aMax).dom = Trim(Sheets(tabA).Cells(aMax + 1, 7)) + Trim(Sheets(tabA).Cells(aMax + 1, 8))
     Loop
     
     'Узнаём размер входных таблиц
@@ -123,7 +123,6 @@ Private Sub ButtonOK_Click()
     R = 4
     For a = 1 To aMax
         curDom = uk(a).ul + ", " + LCase(uk(a).dom)
-        'If a Mod 50 = 0 Then
         Call Misc.Message("Построение отчёта... " + CStr(a) + " из " + CStr(aMax) + " (" + curDom + ")")
         ReDim res(0) As Adress
         Call FindHome(tab1, max1, 1)
@@ -183,8 +182,8 @@ Sub FindHome(name As String, max As Long, t As Integer)
     
     For i = 2 To max
     
-        ul = Sheets(name).Cells(i, cUl)
-        dom = CStr(Sheets(name).Cells(i, cDom)) + LCase(Sheets(name).Cells(i, cDom + 1))
+        ul = Trim(Sheets(name).Cells(i, cUl))
+        dom = CStr(Sheets(name).Cells(i, cDom)) + LCase(Trim(Sheets(name).Cells(i, cDom + 1)))
         kv = Sheets(name).Cells(i, cKv)
         
         If curDom = ul + ", " + dom Then

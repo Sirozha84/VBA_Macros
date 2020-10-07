@@ -16,7 +16,7 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 'Загрузка программы
 Private Sub UserForm_Activate()
-    LabelVersion = "Версия: 2.1 (09.09.2020)"
+    LabelVersion = "Версия: 2.2 (07.10.2020)"
     TextBoxHeat = Sheets(1).name
     TextBoxHW = Sheets(2).name
 End Sub
@@ -107,7 +107,7 @@ Private Sub ButtonOK_Click()
             If Find > 0 Then
                 'Запись есть, дополняем её
                 If records(Find).VolumeHW <> 0 Then
-                    MsgBox "Адреса расположены не попорядку, ранее уже встрачался: " + lastad
+                    MsgBox "Вкладка """ + tabHW + """, Строка " + CStr(i) + Chr(13) + "Адрес """ + lastad + """ был ранее, но предыдущий отличается. Адреса должны располагаться по порядку!"
                     End
                 End If
                 records(Find).PPHW = pp

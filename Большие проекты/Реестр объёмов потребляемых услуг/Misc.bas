@@ -1,4 +1,7 @@
 Attribute VB_Name = "Misc"
+'Last change: 06.04.2021 09:36
+
+Dim startTime As Date
 Private SearchMethod As Byte
 
 'Сообщение в строку статуса
@@ -91,3 +94,19 @@ Function Search(ByVal name As String, ByVal str As String, ByVal first As Long, 
     Search = Find
 
 End Function
+
+'Начало процесса (для прогноза завершения)
+Function StartProcess()
+    startTime = Time
+End Function
+
+'Прогнозирование времени завершения
+Function TimePredict(ByVal complate As Integer, ByVal all As Integer) As String
+    timepassed = Time - startTime
+    timeforone = timepassed / complate
+    alltime = timeforone * (all - complate)
+    st = CStr(Time + alltime)
+    TimePredict = "   Процесс завершится примерно в " + Left(st, Len(st) - 3)
+End Function
+
+'******************** End of File ********************

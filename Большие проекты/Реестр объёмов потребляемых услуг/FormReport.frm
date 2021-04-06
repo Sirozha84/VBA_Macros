@@ -1,7 +1,7 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} FormReport 
    Caption         =   "Настройка отчёта"
-   ClientHeight    =   3600
+   ClientHeight    =   4680
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   5520
@@ -14,7 +14,9 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-'Колонки
+'Last change: 06.04.2021 08:22
+
+'Колонки входных данных
 Const cPotr = 1     'Потребитель
 Const cNP = 2       'Населённый пункт
 Const cUl = 3       'Улица
@@ -31,11 +33,11 @@ Dim curDom As String 'Адрес текущего дома для поиска
 
 'Загрузка программы
 Private Sub UserForm_Activate()
-    LabelVersion = "Версия: 1.0 (05.03.2020)"
+    LabelVersion = "Версия: 1.1 (06.04.2021)"
     On Error GoTo er
     TextBoxTN = Sheets(1).name
     TextBoxHVS = Sheets(2).name
-    TextBoxUK = Sheets(3).name
+    TextBoxUK = Sheets("УК").name
     Exit Sub
 er:
     MsgBox ("Не хватает данных")
@@ -73,12 +75,14 @@ Private Sub ButtonOK_Click()
     aMax = 0
     i = 2
     Do While tabA.Cells(i, 3) <> ""
-        aMax = aMax + 1
-        ReDim Preserve houses(aMax) As Adress
-        houses(aMax).UK = Trim(tabA.Cells(i, 3))
-        houses(aMax).ul = Trim(tabA.Cells(i, 8)) + " " + Trim(tabA.Cells(i, 9))
-        houses(aMax).dom = LCase(Trim(tabA.Cells(i, 10)) + Trim(tabA.Cells(i, 11)))
-        houses(aMax).korp = Trim(tabA.Cells(i, 13))
+        If LCase(tabA.Cells(i, 14).text) = "да" Then
+            aMax = aMax + 1
+            ReDim Preserve houses(aMax) As Adress
+            houses(aMax).UK = Trim(tabA.Cells(i, 3))
+            houses(aMax).ul = Trim(tabA.Cells(i, 8)) + " " + Trim(tabA.Cells(i, 9))
+            houses(aMax).dom = LCase(Trim(tabA.Cells(i, 10)) + Trim(tabA.Cells(i, 11)))
+            houses(aMax).korp = Trim(tabA.Cells(i, 13))
+        End If
         i = i + 1
     Loop
     
@@ -86,8 +90,8 @@ Private Sub ButtonOK_Click()
     max1 = FindMax(tab1)
     max2 = FindMax(tab2)
     
-    'Попёрли клепать отчёт...
-    
+    'Построение отчёта
+    StartProcess
     lastUK = ""
     For a = 1 To aMax
         UK = houses(a).UK
@@ -131,7 +135,8 @@ Private Sub ButtonOK_Click()
     
         'Построение отчёта
         curDom = houses(a).ul + ", " + LCase(houses(a).dom)
-        Call Misc.Message("Построение отчёта... " + CStr(a) + " из " + CStr(aMax) + " (" + curDom + ")")
+        Message "Построение отчёта... " + CStr(a) + " из " + CStr(aMax) + _
+                " (" + curDom + ")" + TimePredict(a, aMax)
         ReDim res(0) As Adress
         Call FindHome(tab1, max1, 1)
         Call FindHome(tab2, max2, 2)
@@ -227,3 +232,5 @@ Sub Borders(ByVal x1 As Long, y1 As Long, x2 As Long, y2 As Long)
     Range(Cells(x1, y1), Cells(x2, y2)).Borders(xlEdgeRight).Weight = 4
     Range(Cells(x1, y1), Cells(x2, y2)).Borders(xlEdgeTop).Weight = 4
 End Sub
+
+'******************** End of File ********************

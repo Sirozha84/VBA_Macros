@@ -13,7 +13,6 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-'Last change: 06.04.2021 08:22
 
 Private Sub UserForm_Activate()
     On Error GoTo er
@@ -75,5 +74,3 @@ End Function
 Private Sub ButtonClose_Click()
     End
 End Sub
-
-'******************** End of File ********************

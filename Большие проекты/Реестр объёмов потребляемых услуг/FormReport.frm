@@ -14,7 +14,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-'Last change: 06.04.2021 08:22
+'Last change: 19.04.2021 13:26
 
 'Колонки входных данных
 Const cPotr = 1     'Потребитель
@@ -22,6 +22,7 @@ Const cNP = 2       'Населённый пункт
 Const cUl = 3       'Улица
 Const cDom = 4      'Дом
 Const cKv = 7       'Квартира
+Const cLs = 8       'Номер лицевого счёта
 Const cPr = 10      'Прописано
 
 Const v1 = 13       'Колонка объём потребления ИПУ
@@ -33,7 +34,7 @@ Dim curDom As String 'Адрес текущего дома для поиска
 
 'Загрузка программы
 Private Sub UserForm_Activate()
-    LabelVersion = "Версия: 1.1 (06.04.2021)"
+    LabelVersion = "Версия: 1.2 (19.04.2021)"
     On Error GoTo er
     TextBoxTN = Sheets(1).name
     TextBoxHVS = Sheets(2).name
@@ -192,13 +193,14 @@ Sub FindHome(tb As Variant, max As Long, t As Integer)
         ul = Trim(tb.Cells(i, cNP)) + " " + Trim(tb.Cells(i, cUl))
         dom = CStr(tb.Cells(i, cDom)) + LCase(Trim(tb.Cells(i, cDom + 1)))
         kv = tb.Cells(i, cKv)
+        ls = tb.Cells(i, cLs)
         
         If curDom = ul + ", " + dom Then
             
             'Ищем, есть ли адрес в результатах
             Find = 0
             For j = 1 To UBound(res)
-                If res(j).ul = ul And res(j).dom = dom And res(j).kv = kv Then
+                If res(j).ul = ul And res(j).dom = dom And res(j).kv = kv And res(j).ls = ls Then
                     Find = j
                     Exit For
                 Else
@@ -215,6 +217,7 @@ Sub FindHome(tb As Variant, max As Long, t As Integer)
             
             'Размещаем остальные данные в запись
             res(Find).kv = tb.Cells(i, cKv)
+            res(Find).ls = tb.Cells(i, cLs)
             If t = 1 Then
                 res(Find).t1 = i
             Else

@@ -1,5 +1,5 @@
 Attribute VB_Name = "Starter"
-'Last change: 06.04.2021 08:49
+'Last change: 19.04.2021 13:20
 
 Type Adress
     UK As String    'Управляющая компания
@@ -7,6 +7,7 @@ Type Adress
     dom As String
     korp As String
     kv As String
+    ls As String    'Номер лицевого счёта
     index As Long
     t1 As Long
     t2 As Long
@@ -14,6 +15,10 @@ End Type
 
 Public Sub Start()
     FormReport.Show
+End Sub
+
+Public Sub SendEmails()
+    FormEmails.Show
 End Sub
 
 Public Sub Instruction()

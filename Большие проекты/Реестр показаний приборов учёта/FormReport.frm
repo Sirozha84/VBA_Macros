@@ -14,6 +14,8 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+'Last change: 01.06.2021 09:17
+
 Const cPotr = 1     'Колонка потребителя
 Const cUl = 4       'Колонка улицы
 Const cDom = 5      'Колонка дом
@@ -28,11 +30,11 @@ Dim curDom As String 'Адрес текущего дома для поиска
 
 'Загрузка программы
 Private Sub UserForm_Activate()
-    LabelVersion = "Версия: 1.0 (16.10.2020)"
+    LabelVersion = "Версия: 1.1 (01.06.2021)"
     On Error GoTo er
     TextBoxTN = Sheets(1).name
     TextBoxHVS = Sheets(2).name
-    TextBoxUK = Sheets(3).name
+    TextBoxUK = Sheets("УК").name
     Exit Sub
 er:
     MsgBox ("Не хватает данных")
@@ -214,3 +216,5 @@ Sub Borders(ByVal x1 As Long, y1 As Long, x2 As Long, y2 As Long)
     Range(Cells(x1, y1), Cells(x2, y2)).Borders(xlEdgeRight).Weight = 4
     Range(Cells(x1, y1), Cells(x2, y2)).Borders(xlEdgeTop).Weight = 4
 End Sub
+
+'******************** End of File ********************

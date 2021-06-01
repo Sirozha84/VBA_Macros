@@ -1,4 +1,6 @@
 Attribute VB_Name = "Misc"
+'Last change: 01.06.2021 09:17
+
 Private SearchMethod As Byte
 
 'Сообщение в строку статуса
@@ -91,3 +93,5 @@ Function Search(ByVal name As String, ByVal str As String, ByVal first As Long, 
     Search = Find
 
 End Function
+
+'******************** End of File ********************
